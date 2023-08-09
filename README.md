@@ -41,7 +41,7 @@ pip3 install pykwalify packaging pyelftools
 
 ### 1.3 Download and setup the toolchain
 
-### Choosing the Right Toolchain
+#### - Choosing the Right Toolchain
 
 [arm-toolchains]: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 [riscv-toolchains]: https://github.com/sifive/freedom-tools/releases
@@ -54,7 +54,7 @@ b) Armv7 or Armv8 Aarch32: In this case, go for the ``arm-none-eabi-`` toolchain
 
 c) RISC-V: If you're working with RISC-V, select the ``riscv64-unknown-elf-`` toolchain. You can download it from [SiFive's Freedom Tools][riscv-toolchains] GitHub repository.
 
-### Installing and Configuring the Toolchain
+#### - Installing and Configuring the Toolchain
 
 Install the toolchain. Then, set the **CROSS_COMPILE** environment variable 
 with the reference toolchain prefix path:
@@ -200,7 +200,7 @@ Next up, we'll guide you through building the Bao Hypervisor itself. This critic
 
 Our first stride in this journey involves configuring the hypervisor using Bao's configuration file. For this specific setup, we're offering you the [configuration file](configs/baremetal.c)to facilitate the process. If you're curious to explore different configuration options, our detailed our detailed Bao config documentation is [here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config) to help.
 
-> [!Warning] If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
+:warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
 ```c
 VM_IMAGE(baremetal_image, XSTR(BAO_DEMOS_WRKDIR_IMGS/baremetal.bin));
 ```
