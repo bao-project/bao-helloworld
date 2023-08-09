@@ -202,7 +202,7 @@ Our first stride in this journey involves configuring the hypervisor using Bao's
 
 :warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
 ```c
-VM_IMAGE(baremetal_image, XSTR(BAO_DEMOS_WRKDIR_IMGS/baremetal.bin));
+VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
 ```
 
 ## Build Firmware - Powering Up Your Setup
