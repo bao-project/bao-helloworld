@@ -70,7 +70,7 @@ With your environment set up and all the dependencies installed, you're now read
 
 ---
 
-## Initial setup - Taking the First Steps!
+## 2. Initial setup - Taking the First Steps!
 
 Now that you're geared up, it's time to take the first steps on this tour. In the Initial Setup section, we'll explore the different components of the system and walk you through a practical example to give you a solid foundation.
 
@@ -103,7 +103,7 @@ Upon completing these commands, your directory should resemble the following:
 └──README.md
 ```
 
-## 1. Build Guest - Building Your First Bao Guest
+### 2.1. Build Guest - Building Your First Bao Guest
 
 Let's kickstart your journey by building your inaugural Bao guest! Here, you'll gain hands-on experience crafting a Baremetal Guest. Let's get that virtual machine up and running!
 
@@ -111,7 +111,7 @@ But before we dive into the hands-on excitement, let's understand the setup we'r
 
 ![Init Setup](/img/single-guest.svg)
 
-For the sake of simplicity and accessibility, we'll detach from physical hardware and utilize QEMU (don't worry, we'll guide you through its installation later in the tutorial). However, remember that you can apply these steps to various other platforms as well:
+> :information_source: For the sake of simplicity and accessibility, we'll detach from physical hardware and utilize QEMU (don't worry, we'll guide you through its installation later in the tutorial). However, remember that you can apply these steps to various other platforms as well:
 
 |                     |     Platform      |  ARCH   |
 | ------------------- | :---------------: | :-----: |
@@ -127,11 +127,7 @@ For the sake of simplicity and accessibility, we'll detach from physical hardwar
 | FVP-R AArch32       |   fvp-r-aarch32   | aarch32 |
 | QEMU RV64 virt      | qemu-riscv64-virt | riscv64 |
 
-Let's start by describing the (virtual) platform, which represents the environment where the guest operates—essentially, what it perceives as its physical hardware. For our setup, we'll define a basic guest platform consisting of a timer, a 64MiB memory region, and a UART for communication. Sounds straightforward, doesn't it? Let's translate this into the Bao configuration file:
-
-### Platform Description
-
-The (virtual) platform comprises three main components:
+Let's start by describing the (virtual) platform, which represents the environment where the guest operates—essentially, what it perceives as its physical hardware. For our setup, we'll define a basic guest platform consisting of a timer, a 64MiB memory region, and a UART for communication. Sounds straightforward, doesn't it? Let's translate this into the Bao configuration file. The (virtual) platform comprises three main components:
   
   1. Virtual CPUs (vCPUs), in this case, 4:
 ```c
@@ -195,24 +191,109 @@ mkdir -p $BUILD_GUESTS_DIR/baremetal-setup
 cp $BAREMETAL_SRCS/build/baremetal.bin $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
 ```
 
-## 2. Build Bao Hypervisor - Laying the Foundation
+### 2.2. Build Bao Hypervisor - Laying the Foundation
 Next up, we'll guide you through building the Bao Hypervisor itself. This critical step forms the backbone of your virtualization environment.
 
 Our first stride in this journey involves configuring the hypervisor using Bao's configuration file. For this specific setup, we're offering you the [configuration file](configs/baremetal.c)to facilitate the process. If you're curious to explore different configuration options, our detailed our detailed Bao config documentation is [here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config) to help.
 
-:warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
+> :warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
 ```c
 VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
 ```
 
+Undoubtedly, if we're envisioning our bare-metal system dancing atop the hypervisor stage, we first need that hypervisor in place. Fear not, for our adept team has already shouldered the arduous task. Bao stands ready and waiting for you to harness its power. No need to roll up your sleeves; it's a breeze. Let's embark on this stage-setting journey:
+
+#### - Cloning the Bao Hypervisor
+Your gateway to seamless virtualization begins with cloning the Bao Hypervisor repository. Execute the following commands in your terminal to initiate this crucial step:
+```sh
+export BAO_SRCS=$ROOT_DIR/bao
+git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
+    --branch demo
+```
+
+#### - Copying Your Configuration
+
+Now, let's ensure your unique configuration is seamlessly integrated. Copy your configuration file to the working directory with the following commands:
+```sh
+mkdir -p $mkdir -p $BUILD_BAO_DIR/config
+cp -L $ROOT_DIR/configs/baremetal.c\
+    $BUILD_BAO_DIR/config/baremetal.c
+```
+
+#### - Compiling Bao Hypervisor
+With all set, it's time to bring your Bao Hypervisor to life. You now just need to compile it!
+```sh
+make -C $BAO_SRCS\
+    PLATFORM=qemu-aarch64-virt\
+    CONFIG_REPO=$ROOT_DIR/config\
+    CONFIG=baremetal\
+    CONFIG_BUILTIN=y\
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_BAO_DIR
+```
+
 ## Build Firmware - Powering Up Your Setup
 
-No tour is complete without a firmware build. We'll show you how to get your setup up and running with our straightforward firmware-building process.
+No journey is truly complete without firmware. It's the fuel that powers your virtual world. That's why we're here to guide you through acquiring the essential firmware tailored to your target platform:
+
+#### AArch64 platforms:
+* [Xilinx ZCU102/4](https://github.com/bao-project/bao-demos/tree/master/platforms/zcu104/README.md)
+* [NXP i.MX8QM](https://github.com/bao-project/bao-demos/tree/master/platforms/imx8qm/README.md)
+* [Nvidia TX2](https://github.com/bao-project/bao-demos/tree/master/platforms/tx2/README.md)
+* [Raspberry 4 Model B](https://github.com/bao-project/bao-demos/tree/master/platforms/rpi4/README.md)
+* [QEMU virt](https://github.com/bao-project/bao-demos/tree/master/platforms/qemu-aarch64-virt/README.md)
+* [FVP-A Aarch64](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-a/README.md)
+* [FVP-R Aarch64](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-r/README.md)
+
+#### AArch32 platforms:
+* [FVP-A Aarch32](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-a-aarch32/README.md)
+* [FVP-R Aarch32](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-r-aarch32/README.md)
+
+#### RISC-V platforms:
+* [QEMU virt](https://github.com/bao-project/bao-demos/tree/master/platforms/qemu-riscv64-virt/README.md)
 
 
 ## Let's Try It Out! - Unleash the Power
 
-Now that everything is set up, let's put it to the test! We'll show you how to fire up your newly created virtual machines and experience the magic of Bao firsthand.
+Now that the stage is set, it's time to witness the magic firsthand. Brace yourself as we ignite the virtual flames and bring your creation to life. Get ready for an experience like no other as we embark on this journey:
+
+:white_check_mark: + Build guest (baremetal)
+
+:white_check_mark: + Build bao hypervisor
+
+:white_check_mark: + Build firmware (qemu)
+
+With all the pieces in place, it's time to launch QEMU and behold the fruits of your labor. The moment of truth awaits, so let's dive right in:
+
+```sh
+ qemu-system-riscv64 -nographic\
+    -M virt -cpu rv64 -m 4G -smp 4\
+    -bios $BAO_DEMOS_WRKDIR_IMGS/opensbi.elf\
+    -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
+    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3 -S
+```
+
+After, set up connections and jump into the world of Bao. QEMU will reveal the pseudoterminals where it placed the virtio serial. Here's an example:
+
+```sh
+char device redirected to /dev/pts/4 (label serial3)
+```
+
+To make the connection, open a fresh terminal window and establish a connection to the specified pseudoterminal. Here's how:
+
+```sh
+screen /dev/pts/4
+```
+
+Now, let's start the emulation by pressing ``Ctrl-a`` followed by ``c`` in the terminal where you launched QEMU. This will access the monitor console. Execute the following command to initiate the emulation:
+
+```sh
+(qemu) cont
+```
+
+To interact with the guest through the serial console, press ``Ctrl-a`` followed by ``c`` again.
+
+
+When you want to leave QEMU press `Ctrl-a` then `x`.
 
 ## Well, Maybe the Setup Was Not Perfect...
 
