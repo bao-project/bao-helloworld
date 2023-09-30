@@ -41,20 +41,23 @@ pip3 install pykwalify packaging pyelftools
 
 ### 1.3 Download and setup the toolchain
 
-#### - Choosing the Right Toolchain
+#### 1.3.1. Choosing the Right Toolchain
+
+[arm-toolchains]: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+[riscv-toolchains]: https://github.com/sifive/freedom-tools/releases
 
 [arm-toolchains]: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 [riscv-toolchains]: https://github.com/sifive/freedom-tools/releases
 
 Before we delve deeper, let's ensure you have the right tools at your disposal. We'll guide you through obtaining and configuring the appropriate cross-compile toolchain for your target architecture. This step is essential for a smooth development experience.
 
-a) Armv8 Aarch64: For this architecture, opt for the ``aarch64-none-elf-`` toolchain. Download it from the [Arm Developer's][arm-toolchains] website.
+| Architecture             | Toolchain Name             | Download Link                              |
+|--------------------------|:--------------------------:|:------------------------------------------:|
+| Armv8 Aarch64            | aarch64-none-elf-          | [Arm Developer][arm-toolchains]            |
+| Armv7 or Armv8 Aarch32   | arm-none-eabi-             | [Arm Developer][arm-toolchains]            |
+| RISC-V                   | riscv64-unknown-elf-       | [SiFive's Freedom Tools][riscv-toolchains] |
 
-b) Armv7 or Armv8 Aarch32: In this case, go for the ``arm-none-eabi-`` toolchain. Download it from the [Arm Developer's][arm-toolchains] website.
-
-c) RISC-V: If you're working with RISC-V, select the ``riscv64-unknown-elf-`` toolchain. You can download it from [SiFive's Freedom Tools][riscv-toolchains] GitHub repository.
-
-#### - Installing and Configuring the Toolchain
+#### 1.3.2. Installing and Configuring the Toolchain
 
 Install the toolchain. Then, set the **CROSS_COMPILE** environment variable 
 with the reference toolchain prefix path:
@@ -74,10 +77,8 @@ With your environment set up and all the dependencies installed, you're now read
 
 Now that you're geared up, it's time to take the first steps on this tour. In the Initial Setup section, we'll explore the different components of the system and walk you through a practical example to give you a solid foundation.
 
-To ensure a smooth journey ahead, let's start by creating a development environment. While this step isn't mandatory, it will greatly assist you in navigating the upcoming stages. Remember, this is just one approach to defining your workspace; feel free to explore alternatives that best suit your specific requirements.
-
-We'll begin by establishing a directory structure for the various components of our setups. Open up your terminal and execute the following commands:
-```c
+To ensure a smooth journey ahead, let's start by creating a development environment. We'll begin by establishing a directory structure for the various components of our setups. Open up your terminal and execute the following commands:
+```sh
 export ROOT_DIR=$(realpath .)
 export SETUP_BUILD=$ROOT_DIR/bin
 
@@ -105,105 +106,51 @@ Upon completing these commands, your directory should resemble the following:
 
 ### 2.1. Build Guest - Building Your First Bao Guest
 
-Let's kickstart your journey by building your inaugural Bao guest! Here, you'll gain hands-on experience crafting a Baremetal Guest. Let's get that virtual machine up and running!
+[bao-demos-platforms]: https://github.com/bao-project/bao-demos#appendix-i
 
-But before we dive into the hands-on excitement, let's understand the setup we're crafting. Our goal is to deploy a bare-metal system atop the Bao hypervisor, as illustrated in the figure below:
+Let's kickstart your journey by building your inaugural Bao guest! Here, you'll gain hands-on experience crafting a Baremetal Guest. Let's get that virtual machine up and running!But before we dive into the hands-on excitement, let's understand the setup we're crafting. Our goal is to deploy a baremetal system atop the Bao hypervisor, as illustrated in the figure below:
 
 ![Init Setup](/img/single-guest.svg)
 
-> :information_source: For the sake of simplicity and accessibility, we'll detach from physical hardware and utilize QEMU (don't worry, we'll guide you through its installation later in the tutorial). However, remember that you can apply these steps to various other platforms as well:
+> :information_source: For the sake of simplicity and accessibility, we'll detach from physical hardware and use QEMU (don't worry, we'll guide you through its installation later in the tutorial). However, remember that you can apply these steps to various [other platforms][arm-toolchains].
 
-|                     |     Platform      |  ARCH   |
-| ------------------- | :---------------: | :-----: |
-| Xilinx ZCU102       |      zcu102       | aarch64 |
-| Xilinx ZCU104       |      zcu104       | aarch64 |
-| NXP i.MX8QM         |      imx8qm       | aarch64 |
-| Nvidia TX2          |        tx2        | aarch64 |
-| Raspberry 4 Model B |       rpi4        | aarch64 |
-| QEMU Aarch64 virt   | qemu-aarch64-virt | aarch64 |
-| FVP-A AArch64       |       fvp-a       | aarch64 |
-| FVP-R AArch64       |       fvp-r       | aarch64 |
-| FVP-A AArch32       |   fvp-a-aarch32   | aarch32 |
-| FVP-R AArch32       |   fvp-r-aarch32   | aarch32 |
-| QEMU RV64 virt      | qemu-riscv64-virt | riscv64 |
-
-Let's start by describing the (virtual) platform, which represents the environment where the guest operates—essentially, what it perceives as its physical hardware. For our setup, we'll define a basic guest platform consisting of a timer, a 64MiB memory region, and a UART for communication. Sounds straightforward, doesn't it? Let's translate this into the Bao configuration file. The (virtual) platform comprises three main components:
-  
-  1. Virtual CPUs (vCPUs), in this case, 4:
-```c
-.cpu_num = 4,
-```
-
-  2. Memory region, which is 64MiB in this instance:
-```c
-.region_num = 1,
-.regions =  (struct vm_mem_region[]) {
-    {
-        .base = 0x50000000,
-        .size = 0x4000000 
-    }
-},
-```
-  3. Devices—namely, the timer and the UART:
-```c
-.dev_num = 2,
-.devs =  (struct vm_dev_region[]) {
-    {   
-        /* PL011 */
-        .pa = 0x9000000,
-        .va = 0x9000000,
-        .size = 0x10000,
-        .interrupt_num = 1,
-        .interrupts = (irqid_t[]) {33}                        
-    },
-    {   
-        /* Arch timer interrupt */
-        .interrupt_num = 1,
-        .interrupts = 
-            (irqid_t[]) {27}                         
-    }
-},
-```
-
-Now that we're clear on our destination, let's forge ahead and construct our guest. We'll provide you with a simple example to help you along, but remember, this isn't the only path. Feel free to explore various bare-metal applications; after all, you're the developer!
-
-To start, let's define an environment variable for the bare-metal app source code:
+To start, let's define an environment variable for the baremetal app source code:
 ```c
 export BAREMETAL_SRCS=$ROOT_DIR/baremetal
 ```
 
-Then, clone the Bao bare-metal guest application we've prepared (you can skip this step if you already have your own bare-metal source):
+Then, clone the Bao baremetal guest application we've prepared (you can skip this step if you already have your own baremetal source):
 ```c
 git clone https://github.com/bao-project/bao-baremetal-guest.git\
     --branch demo $BAREMETAL_SRCS
 ```
 
-And now, let's compile it (for simplicity, our example includes a Makefile to compile the bare-metal compilation):
+And now, let's compile it (for simplicity, our example includes a Makefile to compile the baremetal compilation):
 ```c
 make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
 ```
 
-Upon completing these steps, you'll uncover a binary treasure awaiting you in the BAREMETAL_SRCS directory. If you followed our provided Makefile, this precious gem will bear the name ``baremetal.bin``. This binary represents the image of your soon-to-be unleashed bare-metal guest. It's time to transfer this treasure to the designated vault, your build directory (``BUILD_GUESTS_DIR``).
+Upon completing these steps, you'll find a binary file in the BAREMETAL_SRCS directory. If you followed our provided Makefile, this precious gem will bear the name ``baremetal.bin``. Now, move the binary file to your build directory (``BUILD_GUESTS_DIR``):
 
-Execute the following commands in your terminal to securely transport your binary to its rightful place:
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-setup
-cp $BAREMETAL_SRCS/build/baremetal.bin $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
 ```
 
 ### 2.2. Build Bao Hypervisor - Laying the Foundation
 Next up, we'll guide you through building the Bao Hypervisor itself. This critical step forms the backbone of your virtualization environment.
 
-Our first stride in this journey involves configuring the hypervisor using Bao's configuration file. For this specific setup, we're offering you the [configuration file](configs/baremetal.c)to facilitate the process. If you're curious to explore different configuration options, our detailed our detailed Bao config documentation is [here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config) to help.
+Our first stride in this journey involves configuring the hypervisor using Bao's configuration file. For this specific setup, we're offering you the [configuration file](configs/baremetal.c) to ease the process. If you're curious to explore different configuration options, our detailed our detailed Bao config documentation is [here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config) to help.
 
-> :warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
 ```c
 VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
 ```
 
-Undoubtedly, if we're envisioning our bare-metal system dancing atop the hypervisor stage, we first need that hypervisor in place. Fear not, for our adept team has already shouldered the arduous task. Bao stands ready and waiting for you to harness its power. No need to roll up your sleeves; it's a breeze. Let's embark on this stage-setting journey:
+> :warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
 
-#### - Cloning the Bao Hypervisor
+Undoubtedly, if we're envisioning our baremetal system dancing atop the hypervisor stage, we first need that hypervisor in place. Fear not, for our adept team has already shouldered the arduous task. Bao stands ready and waiting for you to harness its power. No need to roll up your sleeves; it's a breeze. Let's embark on this stage-setting journey:
+
+#### 2.2.1. Cloning the Bao Hypervisor
 Your gateway to seamless virtualization begins with cloning the Bao Hypervisor repository. Execute the following commands in your terminal to initiate this crucial step:
 ```sh
 export BAO_SRCS=$ROOT_DIR/bao
@@ -211,7 +158,7 @@ git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
     --branch demo
 ```
 
-#### - Copying Your Configuration
+#### 2.2.2. Copying Your Configuration
 
 Now, let's ensure your unique configuration is seamlessly integrated. Copy your configuration file to the working directory with the following commands:
 ```sh
@@ -220,63 +167,114 @@ cp -L $ROOT_DIR/configs/baremetal.c\
     $BUILD_BAO_DIR/config/baremetal.c
 ```
 
-#### - Compiling Bao Hypervisor
+#### 2.2.3. Compiling Bao Hypervisor
 With all set, it's time to bring your Bao Hypervisor to life. You now just need to compile it!
 ```sh
 make -C $BAO_SRCS\
     PLATFORM=qemu-aarch64-virt\
-    CONFIG_REPO=$ROOT_DIR/config\
+    CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal\
     CONFIG_BUILTIN=y\
-    CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_BAO_DIR
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
 ```
 
-## Build Firmware - Powering Up Your Setup
+Upon completing these steps, you'll find a binary file in the BAO_SRCS directory, called bao.bin. Now, move the binary file to your build directory (BUILD_BAO_DIR):
 
-No journey is truly complete without firmware. It's the fuel that powers your virtual world. That's why we're here to guide you through acquiring the essential firmware tailored to your target platform:
+```sh
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
+```
 
-#### AArch64 platforms:
-* [Xilinx ZCU102/4](https://github.com/bao-project/bao-demos/tree/master/platforms/zcu104/README.md)
-* [NXP i.MX8QM](https://github.com/bao-project/bao-demos/tree/master/platforms/imx8qm/README.md)
-* [Nvidia TX2](https://github.com/bao-project/bao-demos/tree/master/platforms/tx2/README.md)
-* [Raspberry 4 Model B](https://github.com/bao-project/bao-demos/tree/master/platforms/rpi4/README.md)
-* [QEMU virt](https://github.com/bao-project/bao-demos/tree/master/platforms/qemu-aarch64-virt/README.md)
-* [FVP-A Aarch64](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-a/README.md)
-* [FVP-R Aarch64](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-r/README.md)
+## 3. Build Firmware - Powering Up Your Setup
 
-#### AArch32 platforms:
-* [FVP-A Aarch32](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-a-aarch32/README.md)
-* [FVP-R Aarch32](https://github.com/bao-project/bao-demos/tree/master/platforms/fvp-r-aarch32/README.md)
+No journey is truly complete without firmware. It's the fuel that powers your virtual world. That's why we're here to guide you through acquiring the essential firmware tailored to your target platform (you can find the pointer to build the firmware to other platforms [here](https://github.com/bao-project/bao-demos#b5-build-firmware-and-deploy)).
 
-#### RISC-V platforms:
-* [QEMU virt](https://github.com/bao-project/bao-demos/tree/master/platforms/qemu-riscv64-virt/README.md)
+### 3.1 Welcome to the QEMU platform!
+
+Why bother with a hardware platform when you have QEMU? If you haven't got it yet, fret not. We're here to guide you through the process of building and installing it. In this guide, our focus will be on Aarch64 QEMU.
+
+However, if you're already equipped with qemu-system-aarch64, or if compiling isn't your cup of tea and you'd rather install it directly using a package manager or another method, ensure that you're working with version 7.2.0 or higher. In that case, you can jump ahead to the next step.
+
+To install QEMU, simply run the following commands:
+
+```sh
+export QEMU_DIR=$ROOT_DIR/tools/qemu-aarch64
+export TOOLS_DIR=$ROOT_DIR/tools/bin
+mkdir -p $ROOT_DIR/tools/bin
+mkdir -p $TOOLS_DIR
+git clone https://github.com/qemu/qemu.git $QEMU_DIR --depth 1\
+   --branch v7.2.0
+cd $QEMU_DIR
+./configure --target-list=aarch64-softmmu --enable-slirp
+make -j$(nproc)
+sudo make install
+```
+
+### 3.2 Now you need u-boot
+
+To build and install u-boot, execute the following commands:
+
+```sh
+export UBOOT_DIR=$ROOT_DIR/tools/u-boot
+git clone https://github.com/u-boot/u-boot.git $UBOOT_DIR --depth 1\
+   --branch v2022.10
+
+cd $UBOOT_DIR
+make qemu_arm64_defconfig
+
+echo "CONFIG_TFABOOT=y" >> .config
+echo "CONFIG_SYS_TEXT_BASE=0x60000000" >> .config
+
+make -j$(nproc)
+
+cp $UBOOT_DIR/u-boot.bin $TOOLS_DIR
+```
+
+### 3.3 Almost there, let's build TF-A
+
+One more tool to go! Let's build TF-A:
+```sh
+export ATF_DIR=$ROOT_DIR/tools/arm-trusted-firmware
+git clone https://github.com/bao-project/arm-trusted-firmware.git\
+   $ATF_DIR --branch bao/demo --depth 1
+cd $ATF_DIR
+make PLAT=qemu bl1 fip BL33=$$TOOLS_DIR/u-boot.bin\
+   QEMU_USE_GIC_DRIVER=QEMU_GICV3
+dd if=$ATF_DIR/build/qemu/release/bl1.bin\
+   of=$TOOLS_DIR/flash.bin
+dd if=$ATF_DIR/build/qemu/release/fip.bin\
+   of=$TOOLS_DIR/flash.bin seek=64 bs=4096 conv=notrunc
+```
 
 
-## Let's Try It Out! - Unleash the Power
+## 4. Let's Try It Out! - Unleash the Power
 
 Now that the stage is set, it's time to witness the magic firsthand. Brace yourself as we ignite the virtual flames and bring your creation to life. Get ready for an experience like no other as we embark on this journey:
 
-:white_check_mark: + Build guest (baremetal)
+:white_check_mark: Build guest (baremetal)
 
-:white_check_mark: + Build bao hypervisor
+:white_check_mark: Build bao hypervisor
 
-:white_check_mark: + Build firmware (qemu)
+:white_check_mark: Build firmware (qemu)
 
 With all the pieces in place, it's time to launch QEMU and behold the fruits of your labor. The moment of truth awaits, so let's dive right in:
 
 ```sh
- qemu-system-riscv64 -nographic\
-    -M virt -cpu rv64 -m 4G -smp 4\
-    -bios $BAO_DEMOS_WRKDIR_IMGS/opensbi.elf\
-    -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
-    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3 -S
+qemu-system-aarch64 -nographic\
+   -M virt,secure=on,virtualization=on,gic-version=3 \
+   -cpu cortex-a53 -smp 4 -m 4G\
+   -bios $TOOLS_DIR/flash.bin \
+   -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on\
+   -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
+   -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
 
-After, set up connections and jump into the world of Bao. QEMU will reveal the pseudoterminals where it placed the virtio serial. Here's an example:
+Now, you should see TF-A and U-boot initialization messages. After, set up connections and jump into the world of Bao. QEMU will reveal the pseudoterminals where it placed the virtio serial. Here's an example:
 
 ```sh
 char device redirected to /dev/pts/4 (label serial3)
 ```
+
+
 
 To make the connection, open a fresh terminal window and establish a connection to the specified pseudoterminal. Here's how:
 
@@ -284,45 +282,409 @@ To make the connection, open a fresh terminal window and establish a connection 
 screen /dev/pts/4
 ```
 
-Now, let's start the emulation by pressing ``Ctrl-a`` followed by ``c`` in the terminal where you launched QEMU. This will access the monitor console. Execute the following command to initiate the emulation:
+![Qemu Boot](/img/TF-A_U-boot.png)
 
+Finally, make u-boot jump to where the bao image was loaded:
 ```sh
-(qemu) cont
+go 0x50000000
 ```
 
-To interact with the guest through the serial console, press ``Ctrl-a`` followed by ``c`` again.
+And you should have an output as follows:
 
+![System Init](/img/System_Init.png)
 
 When you want to leave QEMU press `Ctrl-a` then `x`.
 
-## Well, Maybe the Setup Was Not Perfect...
+## 5. Well, Maybe the Setup Was Not Perfect...
 
 As we continue on this thrilling tour, it's time to explore the art of changing your Bao setup. Mastering the ability to modify your virtual environment opens up endless possibilities. Don't worry if you encounter a few challenges along the way; learning through hands-on experience is the key!
 
 In the following sections, we'll walk you through step-by-step instructions to make various changes to your guests. By the end of this part of the tour, you'll have a deeper understanding of how the different components interact, and you'll be confidently making adjustments to suit your needs.
 
-### Add a second guest
+### 5.1 Add a second guest - freeRTOS
 
-![Init Setup](/img/dual-guest.svg)
+In this section, we'll delve into various scenarios and demonstrate how to configure specific environments using Bao. One of Bao's notable strengths lies in its flexibility, allowing you to tailor your setup to a range of requirements.
 
-## Different scenario? Different setup!
+Let's kick things off by incorporating a second VM running FreeRTOS.
 
-In this section, we'll dive into different scenarios and explore how to set up specific environments with Bao. Flexibility is one of Bao's strengths, and we'll guide you through adapting your setup to suit various needs.
-
-### Baremetals are not enough for your application? Let's try freeRTOS
 ![Init Setup](/img/dual-guest-rtos.svg)
 
-### It was still not perfect right? Let's try out Linux
+First, we can use the baremetal compiled from the first setup:
+```sh
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/baremetal.bin
+```
 
-![Init Setup](/img/dual-guest-rtos-linux.svg)
+#### 5.1.1. Compile freeRTOS
+Then, let's compile our new guest:
+
+```sh
+export FREERTOS_SRCS=$ROOT_DIR/freertos
+export FREERTOS_PARAMS="STD_ADDR_SPACE=y"
+
+git clone --recursive --shallow-submodules\
+    https://github.com/bao-project/freertos-over-bao.git\
+    $FREERTOS_SRCS --branch demo
+make -C $FREERTOS_SRCS PLATFORM=qemu-aarch64-virt $FREERTOS_PARAMS
+```
+
+Upon completing these steps, you'll find a binary file in the `FREERTOS_SRCS` directory, called `free_rtos.bin`. Move the binary file to your build directory (`BUILD_GUESTS_DIR`):
+
+```sh
+mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup
+cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/free-rtos.bin
+```
+
+#### 5.1.2. Integrating the new guest
+
+Now, we have both guests needed for our setup. However, there are some steps required to fit the two VMs on our platform. Let's understand the differences between the configuration of the first setup and the configuration of the second setup.
+
+First of all, we need to add the second VM image:
+
+```diff
+- VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-setup/baremetal.bin));
++ VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/baremetal.bin));
++ VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/free-rtos.bin));
+```
+
+Also, since we now have 2 VMs, we need to change the `vm_list_size` in our configuration:
+
+```diff
+- .vmlist_size = 1,
++ .vmlist_size = 2,
+```
+
+Next, we need to think about resources. In the first setup, we assigned 4 vCPUs to the baremetal. But this time, we need to split the vCPUs between the two VMs:
+
+```diff
+- .cpu_num = 4,
++ .cpu_num = 2,
+```
+
+Additionally, we need to include all the configurations of the second VM. (Details are omitted for simplicity but you can check further details in the [configuration file](configs/baremetal-freeRTOS.c)):
+```diff
++        { 
++            .image = {
++                .base_addr = 0x0,
++                .load_addr = VM_IMAGE_OFFSET(freertos_image),
++                .size = VM_IMAGE_SIZE(freertos_image)
++            },
++
++            ...        // omitted for simplicity
++        },
+```
+
+#### 5.1.3. Let's rebuild Bao!
+
+As we've seen, changing the guests includes changing the configuration file. Therefore, we need to repeat the process of building Bao. First, copy your configuration file to the working directory with the following commands:
+
+```sh
+mkdir -p $mkdir -p $BUILD_BAO_DIR/config
+cp -L $ROOT_DIR/configs/baremetal-freeRTOS.c\
+    $BUILD_BAO_DIR/config/baremetal-freeRTOS.c
+```
+
+Then, you just need to compile it. Please note that the flag `CONFIG` defines the configuration file to be used on the compilation of Bao!
+
+```sh
+make -C $BAO_SRCS\
+    PLATFORM=qemu-aarch64-virt\
+    CONFIG_REPO=$ROOT_DIR/configs\
+    CONFIG=baremetal-freeRTOS\
+    CONFIG_BUILTIN=y\
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+```
+
+Upon completing these steps, you'll find a binary file in the `BAO_SRCS` directory, called `bao.bin`. Move the binary file to your build directory (`BUILD_BAO_DIR`):
+
+```sh
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS/bao.bin $BUILD_BAO_DIR/bao.bin
+```
+
+#### 5.1.4. Ready for launch!
+
+Now, we have everything configured for testing our new setup! Just run the following command:
+```sh
+qemu-system-aarch64 -nographic\
+   -M virt,secure=on,virtualization=on,gic-version=3 \
+   -cpu cortex-a53 -smp 4 -m 4G\
+   -bios $TOOLS_DIR/flash.bin \
+   -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on\
+   -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
+   -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
+```
+
+### 5.2 It was still not perfect right? Let's try out a Linux too
+
+Let's now introduce a third VM running the Linux OS.
+
+![Init Setup](/img/triple-guest.svg)
+
+First, we can re-use our guests from the previous setup:
+```sh
+mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/baremetal.bin
+cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/freertos.bin
+```
+
+#### 5.2.1 Build Linux Guest
+
+Now let's start by building our linux guest. Setup linux environment variables:
+```sh
+export LINUX_DIR=$ROOT_DIR/linux
+export LINUX_REPO=https://github.com/torvalds/linux.git
+export LINUX_VERSION=v6.1
+
+export LINUX_SRCS=$LINUX_DIR/linux-$LINUX_VERSION
+
+mkdir -p $LINUX_DIR/linux-$LINUX_VERSION
+mkdir -p $LINUX_DIR/linux-build
+
+git clone $LINUX_REPO $LINUX_SRCS\
+    --depth 1 --branch $LINUX_VERSION
+cd $LINUX_SRCS
+git apply $ROOT_DIR/srcs/patches/$LINUX_VERSION/*.patch
+```
+
+Setup and environment variable pointing to the target architecture and platform specific config to be used by buildroot:
+
+```sh
+export LINUX_CFG_FRAG=$(ls $ROOT_DIR/srcs/configs/base.config\
+    $ROOT_DIR/srcs/configs/aarch64.config\
+    $ROOT_DIR/srcs/configs/qemu-aarch64-virt.config 2> /dev/null)
+```
+
+Setup buildroot environment variables:
+```sh
+export BUILDROOT_SRCS=$LINUX_DIR/buildroot-aarch64-$LINUX_VERSION
+export BUILDROOT_DEFCFG=$ROOT_DIR/srcs/buildroot/aarch64.config
+export LINUX_OVERRIDE_SRCDIR=$LINUX_SRCS
+```
+
+Clone the latest buildroot at the latest stable version
+```sh
+git clone https://github.com/buildroot/buildroot.git $BUILDROOT_SRCS\
+    --depth 1 --branch 2022.11
+cd $BUILDROOT_SRCS
+```
+
+Use our provided buildroot defconfig, which itselfs points to the a Linux kernel defconfig and patches and build
+```sh
+make defconfig BR2_DEFCONFIG=$BUILDROOT_DEFCFG
+make linux-reconfigure all
+
+mv $BUILDROOT_SRCS/output/images/Image\
+    $BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt
+```
+The device tree for this setup is available in srcs/devicetrees/qemu-aarch64-virt. For a device tree file named linux.dts define a virtual machine variable and build:
+```sh
+export LINUX_VM=linux
+dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+    $LINUX_DIR/linux-build/$LINUX_VM.dtb
+```
+
+Wrap the kernel image and device tree blob in a single binary:
+```sh
+make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
+    ARCH=aarch64\
+    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
+    DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
+    TARGET=$LINUX_DIR/linux-build/$LINUX_VM
+```
+
+Finaly, copy the binary file to the (compiled) guests folder:
+```sh
+cp $LINUX_DIR/linux-build/$LINUX_VM.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/linux.bin
+```
 
 
-## Guests must socialize, right?
+#### 5.2.2 Welcome our new guest!
 
-![Init Setup](/img/dual-guest-updated.svg)
+After building our new guest, it's time to integrate in our setup. You can find all the details in the [configuration file](/configs/baremetal-freeRTOS-linux.c).
 
-### Let's Share Content! - Memory Sharing Made Easy
-Sharing files between guests is essential for seamless collaboration. We'll demonstrate how to set up file sharing and make it a breeze for your virtual machines.
+ After that, we need to load our guests:
+```diff
+- VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/baremetal.bin));
+- VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/free-rtos.bin));
++ VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/baremetal.bin));
++ VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/free-rtos.bin));
++ VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/linux.bin));
+```
 
-### Teaching Guests to Be Polite - Networking Etiquette
-Just like in the real world, networking etiquette matters in the virtual world too! We'll guide you through setting up networking between guests, enabling smooth communication while maintaining order and politeness.
+Let's now update our VM list size to integrate our new guest:
+```diff
+-    .vmlist_size = 2,
++    .vmlist_size = 3,
+```
+
+Then, we need to rearrange the number of vCPUs:
+```diff
+    // baremetal configuration
+    {
+-       .cpu_num = 2,
++       .cpu_num = 1,
+        ...
+    },
+
+    // freeRTOS configuration
+    {   
+-       .cpu_num = 2,
++       .cpu_num = 1,
+        ...
+    },
+
+    // linux configuration
+    {   
++       .cpu_num = 2,
+    }
+```
+
+#### 5.2.3. Let's rebuild Bao!
+
+As we've seen, changing the guests includes changing the configuration file. Therefore, we need to repeat the process of building Bao. First, copy your configuration file to the working directory with the following commands:
+
+```sh
+mkdir -p $mkdir -p $BUILD_BAO_DIR/config
+cp -L $ROOT_DIR/configs/baremetal-freeRTOS-linux.c\
+    $BUILD_BAO_DIR/config/baremetal-freeRTOS-linux.c
+```
+
+Then, you just need to compile it:
+```sh
+make -C $BAO_SRCS\
+    PLATFORM=qemu-aarch64-virt\
+    CONFIG_REPO=$ROOT_DIR/configs\
+    CONFIG=baremetal-freeRTOS-linux\
+    CONFIG_BUILTIN=y\
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+```
+
+Upon completing these steps, you'll find a binary file in the `BAO_SRCS` directory, called `bao.bin`. Move the binary file to your build directory (`BUILD_BAO_DIR`):
+
+```sh
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux/bao.bin $BUILD_BAO_DIR/bao.bin
+```
+
+#### 5.2.4. Ready to go!
+
+With all the pieces in place, it's time to launch QEMU and behold the fruits of your labor. The moment of truth awaits, so let's dive right in:
+
+```sh
+qemu-system-aarch64 -nographic\
+   -M virt,secure=on,virtualization=on,gic-version=3 \
+   -cpu cortex-a53 -smp 4 -m 4G\
+   -bios $TOOLS_DIR/flash.bin \
+   -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on\
+   -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
+   -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
+```
+
+The platform's first available UART is assigned to the baremetal and the FreeRTOS guests. In this manner, you can connect to them using the following command:
+```sh
+screen /dev/pts/4
+```
+
+The Linux guest is also accessible via ssh at the static address 192.168.42.15.
+The password for root is root.
+
+## 5.3 Guests must socialize, right?
+
+In certain scenarios, it's imperative for guests to establish a communication channel. To accomplish this, we'll utilize shared memory and Inter-Process Communication (IPC) mechanisms, allowing the Linux VM to seamlessly interact with the system.
+
+![Init Setup](/img/triple-guest-shmem.svg)
+
+
+### 5.3.1. Add Shared Memory and IPC to our guest
+Let's kick off by integrating an IPC into Linux. To do this, we'll make the necessary additions to the Linux device-tree. For simplicity, the [linux-shmem.dts](/configs/baremetal-freeRTOS-linux-shmem.c) file already encompasses the following changes:
+
+```diff
++    bao-ipc@f0000000 {
++        compatible = "bao,ipcshmem";
++        reg = <0x0 0xf0000000 0x0 0x00010000>;
++		read-channel = <0x0 0x2000>;
++		write-channel = <0x2000 0x2000>;
++        interrupts = <0 52 1>;
++		id = <0>;
++    };
+```
+
+Now, let's generate the updated device tree:
+
+```sh
+export LINUX_VM=linux-shmem
+dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+    $LINUX_DIR/linux-build/$LINUX_VM.dtb
+```
+
+> :warning: **Warning:**: To correctly introduce these changes, you need to ensure that you applied the patch to Linux, as described [before](#521-build-linux-guest).
+
+Bundle the kernel image and device tree blob into a single binary:
+```sh
+make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
+    ARCH=aarch64\
+    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
+    DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
+    TARGET=$LINUX_DIR/linux-build/$LINUX_VM
+```
+
+Finally, move the binary file to the (compiled) guests folder:
+```sh
+cp $LINUX_DIR/linux-build/$LINUX_VM.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/$LINUX_VM.bin
+```
+
+### 5.3.2. Rebuild Bao
+
+Given that you've modified one of the guests, it's now essential to rebuild Bao:
+```sh
+mkdir -p $mkdir -p $BUILD_BAO_DIR/config
+cp -L $ROOT_DIR/configs/baremetal-freeRTOS-linux.c\
+    $BUILD_BAO_DIR/config/baremetal-freeRTOS-linux.c
+```
+
+Subsequently, compile it:
+```sh
+make -C $BAO_SRCS\
+    PLATFORM=qemu-aarch64-virt\
+    CONFIG_REPO=$ROOT_DIR/configs\
+    CONFIG=baremetal-freeRTOS-linux\
+    CONFIG_BUILTIN=y\
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+```
+
+Upon successful completion, you'll locate a binary file named bao.bin in the ``BAO_SRCS`` directory. Move it to your build directory (``BUILD_BAO_DIR``):
+
+```sh
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux/bao.bin $BUILD_BAO_DIR/bao.bin
+```
+
+
+### 5.3.3. Run Our Setup
+
+Now, you're ready to execute the final setup:
+
+```sh
+qemu-system-aarch64 -nographic\
+   -M virt,secure=on,virtualization=on,gic-version=3 \
+   -cpu cortex-a53 -smp 4 -m 4G\
+   -bios $TOOLS_DIR/flash.bin \
+   -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on\
+   -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
+   -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
+```
+
+If all went according to plan, you should be able to spot the IPC on Linux by running the following command:
+```sh
+ls /dev
+```
+
+You'll see your IPC as depicted in the following image:
+![Init Setup](/img/shmem-IPC.png)
+
+From here, you can employ the IPC on Linux to dispatch messages to FreeRTOS by writing to ``/dev/baoipc0``:
+```sh
+echo "Hello, Bao!" > /dev/baoipc0
+```
+
+Or retrieve the latest FreeRTOS message by reading from ``/dev/baoipc0``:
+```sh
+cat /dev/baoipc0
+```
