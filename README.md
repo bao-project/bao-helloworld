@@ -1,30 +1,49 @@
 # "Hello world"? We prefer "Hello Bao!"
 
-Welcome to the Bao Hypervisor! Get ready for an interactive journey as we explore the world of Bao together. Whether you're a seasoned Bao user or a newcomer, this tour is designed to give you a practical and enthusiastic introduction to our powerful hypervisor.
+Welcome to the Bao Hypervisor! Get ready for an interactive journey as we
+explore the world of Bao together. Whether you're a seasoned Bao user or a
+newcomer, this tour is designed to give you a practical and enthusiastic
+introduction to our powerful hypervisor.
 
-If you're already familiar with Bao or want to dive into specific setups provided by our team, feel free to skip ahead to the Bao demos section.
+If you're already familiar with Bao or want to dive into specific setups
+provided by our team, feel free to skip ahead to the Bao demos section.
 
-In this guide, we will take a tour of the different components required to build a setup using the Bao hypervisor and learn how the different components interact. For this purpose, the guide contains the following topics:
+In this guide, we will take a tour of the different components required to build
+a setup using the Bao hypervisor and learn how the different components
+interact. For this purpose, the guide contains the following topics:
 
-- A **getting started** to help users on preparing the environment to build the setup and also some pointers to documentations of Bao (in case you want to go deeper in any detail);
+- A **getting started** to help users on preparing the environment to build the
+  setup and also some pointers to documentations of Bao (in case you want to go
+  deeper in any detail);
 
-- An **initial setup** for giving the first steps on this tour. This section aims to explore the different components of the system and get the first practical example of this guide;
+- An **initial setup** for giving the first steps on this tour. This section
+  aims to explore the different components of the system and get the first
+  practical example of this guide;
 
 - An **interactive tutorial on changing the guests** running on top of Bao;
 
 - A **practical example** of changing the setup running;
 
-- An example of **how different guests can coexist and interact** with each other;
+- An example of **how different guests can coexist and interact** with each
+  other;
 
 ## 1. Getting Started
 
-Before we dive into the thrilling aspects of Bao, let's make sure you're all set up and ready to go. In this section, we'll guide you through preparing your environment to build the setup. Don't worry; we'll provide you with helpful pointers to Bao's documentation in case you want to explore any details further.
+Before we dive into the thrilling aspects of Bao, let's make sure you're all set
+up and ready to go. In this section, we'll guide you through preparing your
+environment to build the setup. Don't worry; we'll provide you with helpful
+pointers to Bao's documentation in case you want to explore any details further.
 
-### 1.1 Recommended Operating System: Linux (e.g., Ubuntu 22.04 or older versions)
-To make the most of this tutorial and the Bao hypervisor, we recommend using a Linux-based operating system. While the instructions may work on other platforms, our focus is on Linux, specifically Ubuntu 22.04 or older versions. This will ensure compatibility and an optimal experience throughout the tour.
+### 1.1 Recommended Operating System: Linux (e.g., Ubuntu 22.04)
+To make the most of this tutorial and the Bao hypervisor, we recommend using a
+Linux-based operating system. While the instructions may work on other
+platforms, our focus is on Linux, specifically Ubuntu 22.04 or older versions.
+This will ensure compatibility and an optimal experience throughout the tour.
 
 ### 1.2 Installing Required Dependencies
-Before we can dive into the world of Bao, we need to install several dependencies to enable a seamless setup process. Open your terminal and run the following command to install the necessary packages:
+Before we can dive into the world of Bao, we need to install several
+dependencies to enable a seamless setup process. Open your terminal and run the
+following command to install the necessary packages:
 
 ```sh
 sudo apt install build-essential bison flex git libssl-dev ninja-build \
@@ -32,8 +51,9 @@ sudo apt install build-essential bison flex git libssl-dev ninja-build \
     gettext-base curl xterm cmake python3-pip
 ```
 
-This command will install essential tools and libraries required for building and running Bao.
-Next, we need to install some Python packages. Execute the following command to do so:
+This command will install essential tools and libraries required for building
+and running Bao. Next, we need to install some Python packages. Execute the
+following command to do so:
 
 ```sh
 pip3 install pykwalify packaging pyelftools
@@ -43,41 +63,55 @@ pip3 install pykwalify packaging pyelftools
 
 #### 1.3.1. Choosing the Right Toolchain
 
-[arm-toolchains]: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
-[riscv-toolchains]: https://github.com/sifive/freedom-tools/releases
+[arm-toolchains]:
+  https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+[riscv-toolchains]:
+  https://github.com/sifive/freedom-tools/releases
 
-[arm-toolchains]: https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
-[riscv-toolchains]: https://github.com/sifive/freedom-tools/releases
+Before we delve deeper, let's ensure you have the right tools at your disposal. 
+We'll guide you through obtaining and configuring the appropriate cross-compile
+toolchain for your target architecture. This step is essential for a smooth
+development experience.
 
-Before we delve deeper, let's ensure you have the right tools at your disposal. We'll guide you through obtaining and configuring the appropriate cross-compile toolchain for your target architecture. This step is essential for a smooth development experience.
+|  Architecture  | Toolchain Name       | Download Link                    |
+|----------------|:--------------------:|:--------------------------------:|
+| Armv8 Aarch64  | aarch64-none-elf-    | [Arm Developer][arm-toolchains]  |
+| Armv7/8 Aarch32| arm-none-eabi-       | [Arm Developer][arm-toolchains]  |
+| RISC-V         | riscv64-unknown-elf- | [SiFive Tools][riscv-toolchains] |
 
-| Architecture             | Toolchain Name             | Download Link                              |
-|--------------------------|:--------------------------:|:------------------------------------------:|
-| Armv8 Aarch64            | aarch64-none-elf-          | [Arm Developer][arm-toolchains]            |
-| Armv7 or Armv8 Aarch32   | arm-none-eabi-             | [Arm Developer][arm-toolchains]            |
-| RISC-V                   | riscv64-unknown-elf-       | [SiFive's Freedom Tools][riscv-toolchains] |
+
 
 #### 1.3.2. Installing and Configuring the Toolchain
 
-Install the toolchain. Then, set the **CROSS_COMPILE** environment variable 
+Install the toolchain. Then, set the **CROSS_COMPILE** environment variable
 with the reference toolchain prefix path:
 
 ```sh
 export CROSS_COMPILE=/path/to/toolchain/install/dir/bin/your-toolchain-prefix-
 ```
 
-### 1.4 Ensuring Sufficient Free Space
+### 1.4 Ensuring Enough Free Space
 
-Please be aware that sufficient free space is crucial for this journey, especially due to the Linux image that will be built for the Linux guest VM. To ensure a smooth experience and avoid any space-related issues, we recommend having at least 20GB of free space available on your system.
-With your environment set up and all the dependencies installed, you're now ready to dive into the world of Bao hypervisor and create your virtualized wonders!
+Please be aware that sufficient free space is crucial for this journey,
+especially due to the Linux image that will be built for the Linux guest VM.
+To ensure a smooth experience and avoid any space-related issues, we recommend
+having at least 13 GiB of free space available on your system. With your
+environment set up and all the dependencies installed, you're now ready to dive
+into the world of Bao hypervisor and create your virtualized wonders!
 
 ---
 
 ## 2. Initial setup - Taking the First Steps!
 
-Now that you're geared up, it's time to take the first steps on this tour. In the Initial Setup section, we'll explore the different components of the system and walk you through a practical example to give you a solid foundation.
+Now that you're geared up, it's time to take the first steps on this tour. In
+the Initial Setup section, we'll explore the different components of the system
+and walk you through a practical example to give you a solid foundation.
 
-To ensure a smooth journey ahead, let's start by creating a development environment. We'll begin by establishing a directory structure for the various components of our setups. Open up your terminal and execute the following commands:
+To ensure a smooth journey ahead, let's start by creating a development
+environment. We'll begin by establishing a directory structure for the various
+components of our setups. Open up your terminal and execute the following
+commands:
+
 ```sh
 export ROOT_DIR=$(realpath .)
 export SETUP_BUILD=$ROOT_DIR/bin
@@ -108,50 +142,79 @@ Upon completing these commands, your directory should resemble the following:
 
 [bao-demos-platforms]: https://github.com/bao-project/bao-demos#appendix-i
 
-Let's kickstart your journey by building your inaugural Bao guest! Here, you'll gain hands-on experience crafting a Baremetal Guest. Let's get that virtual machine up and running!But before we dive into the hands-on excitement, let's understand the setup we're crafting. Our goal is to deploy a baremetal system atop the Bao hypervisor, as illustrated in the figure below:
+Let's kickstart your journey by building your inaugural Bao guest! Here, you'll
+gain hands-on experience crafting a Baremetal Guest. Let's get that virtual
+machine up and running!But before we dive into the hands-on excitement, let's
+understand the setup we're crafting. Our goal is to deploy a baremetal system
+atop the Bao hypervisor, as illustrated in the figure below:
 
 ![Init Setup](/img/single-guest.svg)
 
-> :information_source: For the sake of simplicity and accessibility, we'll detach from physical hardware and use QEMU (don't worry, we'll guide you through its installation later in the tutorial). However, remember that you can apply these steps to various [other platforms][arm-toolchains].
+> :information_source: For the sake of simplicity and accessibility, we'll
+> detach from physical hardware and use QEMU (don't worry, we'll guide you
+> through its installation later in the tutorial). However, remember that you
+> can apply these steps to various [other platforms][arm-toolchains].
 
-To start, let's define an environment variable for the baremetal app source code:
+To start, let's define an environment variable for the baremetal app source
+code:
 ```c
 export BAREMETAL_SRCS=$ROOT_DIR/baremetal
 ```
 
-Then, clone the Bao baremetal guest application we've prepared (you can skip this step if you already have your own baremetal source):
+Then, clone the Bao baremetal guest application we've prepared (you can skip
+this step if you already have your own baremetal source):
 ```c
 git clone https://github.com/bao-project/bao-baremetal-guest.git\
     --branch demo $BAREMETAL_SRCS
 ```
 
-And now, let's compile it (for simplicity, our example includes a Makefile to compile the baremetal compilation):
+And now, let's compile it (for simplicity, our example includes a Makefile to
+compile the baremetal compilation):
 ```c
 make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
 ```
 
-Upon completing these steps, you'll find a binary file in the BAREMETAL_SRCS directory. If you followed our provided Makefile, this precious gem will bear the name ``baremetal.bin``. Now, move the binary file to your build directory (``BUILD_GUESTS_DIR``):
+Upon completing these steps, you'll find a binary file in the ``BAREMETAL_SRCS``
+directory. If you followed our provided Makefile, this precious gem will bear
+the name ``baremetal.bin``. Now, move the binary file to your build directory
+(``BUILD_GUESTS_DIR``):
 
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-setup
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR\
+    /baremetal-setup/baremetal.bin
 ```
 
 ### 2.2. Build Bao Hypervisor - Laying the Foundation
-Next up, we'll guide you through building the Bao Hypervisor itself. This critical step forms the backbone of your virtualization environment.
+Next up, we'll guide you through building the Bao Hypervisor itself. This
+critical step forms the backbone of your virtualization environment.
 
-Our first stride in this journey involves configuring the hypervisor using Bao's configuration file. For this specific setup, we're offering you the [configuration file](configs/baremetal.c) to ease the process. If you're curious to explore different configuration options, our detailed our detailed Bao config documentation is [here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config) to help.
+Our first stride in this journey involves configuring the hypervisor using Bao's
+configuration file. For this specific setup, we're offering you the
+[configuration file](configs/baremetal.c) to ease the process. If you're curious
+to explore different configuration options, our detailed our detailed Bao config
+documentation is [here](https://github.com/bao-project/bao-docs/tree/wip/bao-\
+classic_config) to help.
 
 ```c
 VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
 ```
 
-> :warning: **Warning:** If you are using a directory structure of the one presented in the tutorial, please make sure to update the following code in the [configuration file](configs/baremetal.c).
+> :warning: **Warning:** If you are using a directory structure of the one
+> presented in the tutorial, please make sure to update the following code in
+> the [configuration file](configs/baremetal.c).
 
-Undoubtedly, if we're envisioning our baremetal system dancing atop the hypervisor stage, we first need that hypervisor in place. Fear not, for our adept team has already shouldered the arduous task. Bao stands ready and waiting for you to harness its power. No need to roll up your sleeves; it's a breeze. Let's embark on this stage-setting journey:
+Undoubtedly, if we're envisioning our baremetal system dancing atop the
+hypervisor stage, we first need that hypervisor in place. Fear not, for our
+adept team has already shouldered the arduous task. Bao stands ready and waiting
+for you to harness its power. No need to roll up your sleeves; it's a breeze.
+Let's embark on this stage-setting journey:
 
 #### 2.2.1. Cloning the Bao Hypervisor
-Your gateway to seamless virtualization begins with cloning the Bao Hypervisor repository. Execute the following commands in your terminal to initiate this crucial step:
+Your gateway to seamless virtualization begins with cloning the Bao Hypervisor
+repository. Execute the following commands in your terminal to initiate this
+crucial step:
+
 ```sh
 export BAO_SRCS=$ROOT_DIR/bao
 git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
@@ -160,7 +223,9 @@ git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
 
 #### 2.2.2. Copying Your Configuration
 
-Now, let's ensure your unique configuration is seamlessly integrated. Copy your configuration file to the working directory with the following commands:
+Now, let's ensure your unique configuration is seamlessly integrated. Copy your
+configuration file to the working directory with the following commands:
+
 ```sh
 mkdir -p $mkdir -p $BUILD_BAO_DIR/config
 cp -L $ROOT_DIR/configs/baremetal.c\
@@ -168,7 +233,9 @@ cp -L $ROOT_DIR/configs/baremetal.c\
 ```
 
 #### 2.2.3. Compiling Bao Hypervisor
-With all set, it's time to bring your Bao Hypervisor to life. You now just need to compile it!
+With all set, it's time to bring your Bao Hypervisor to life. You now just need
+to compile it!
+
 ```sh
 make -C $BAO_SRCS\
     PLATFORM=qemu-aarch64-virt\
@@ -178,7 +245,8 @@ make -C $BAO_SRCS\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
 ```
 
-Upon completing these steps, you'll find a binary file in the BAO_SRCS directory, called bao.bin. Now, move the binary file to your build directory (BUILD_BAO_DIR):
+Upon completing these steps, you'll find a binary file in the BAO_SRCS
+directory, called bao.bin. Now, move the binary file to your build directory:
 
 ```sh
 cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
@@ -186,13 +254,21 @@ cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
 
 ## 3. Build Firmware - Powering Up Your Setup
 
-No journey is truly complete without firmware. It's the fuel that powers your virtual world. That's why we're here to guide you through acquiring the essential firmware tailored to your target platform (you can find the pointer to build the firmware to other platforms [here](https://github.com/bao-project/bao-demos#b5-build-firmware-and-deploy)).
+No journey is truly complete without firmware. It's the fuel that powers your
+virtual world. That's why we're here to guide you through acquiring the
+essential firmware tailored to your target platform (you can find the pointer to
+build the firmware to other platforms [here](https://github.com/bao-project/bao-demos#b5-build-firmware-and-deploy)).
 
 ### 3.1 Welcome to the QEMU platform!
 
-Why bother with a hardware platform when you have QEMU? If you haven't got it yet, fret not. We're here to guide you through the process of building and installing it. In this guide, our focus will be on Aarch64 QEMU.
+Why bother with a hardware platform when you have QEMU? If you haven't got it
+yet, fret not. We're here to guide you through the process of building and
+installing it. In this guide, our focus will be on Aarch64 QEMU.
 
-However, if you're already equipped with qemu-system-aarch64, or if compiling isn't your cup of tea and you'd rather install it directly using a package manager or another method, ensure that you're working with version 7.2.0 or higher. In that case, you can jump ahead to the next step.
+However, if you're already equipped with qemu-system-aarch64, or if compiling
+isn't your cup of tea and you'd rather install it directly using a package
+manager or another method, ensure that you're working with version 7.2.0 or
+higher. In that case, you can jump ahead to the next step.
 
 To install QEMU, simply run the following commands:
 
@@ -248,7 +324,9 @@ dd if=$ATF_DIR/build/qemu/release/fip.bin\
 
 ## 4. Let's Try It Out! - Unleash the Power
 
-Now that the stage is set, it's time to witness the magic firsthand. Brace yourself as we ignite the virtual flames and bring your creation to life. Get ready for an experience like no other as we embark on this journey:
+Now that the stage is set, it's time to witness the magic firsthand. Brace
+yourself as we ignite the virtual flames and bring your creation to life. Get
+ready for an experience like no other as we embark on this journey:
 
 :white_check_mark: Build guest (baremetal)
 
@@ -256,7 +334,8 @@ Now that the stage is set, it's time to witness the magic firsthand. Brace yours
 
 :white_check_mark: Build firmware (qemu)
 
-With all the pieces in place, it's time to launch QEMU and behold the fruits of your labor. The moment of truth awaits, so let's dive right in:
+With all the pieces in place, it's time to launch QEMU and behold the fruits of
+your labor. The moment of truth awaits, so let's dive right in:
 
 ```sh
 qemu-system-aarch64 -nographic\
@@ -264,19 +343,22 @@ qemu-system-aarch64 -nographic\
    -cpu cortex-a53 -smp 4 -m 4G\
    -bios $TOOLS_DIR/flash.bin \
    -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on\
-   -device virtio-net-device,netdev=net0 -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
-   -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
+   -device virtio-net-device,netdev=net0 \
+   -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
+   -device virtio-serial-device -chardev pty,id=serial3 \
+   -device virtconsole,chardev=serial3
 ```
 
-Now, you should see TF-A and U-boot initialization messages. After, set up connections and jump into the world of Bao. QEMU will reveal the pseudoterminals where it placed the virtio serial. Here's an example:
+Now, you should see TF-A and U-boot initialization messages. After, set up
+connections and jump into the world of Bao. QEMU will reveal the pseudoterminals
+where it placed the virtio serial. Here's an example:
 
 ```sh
 char device redirected to /dev/pts/4 (label serial3)
 ```
 
-
-
-To make the connection, open a fresh terminal window and establish a connection to the specified pseudoterminal. Here's how:
+To make the connection, open a fresh terminal window and establish a connection
+to the specified pseudoterminal. Here's how:
 
 ```sh
 screen /dev/pts/4
