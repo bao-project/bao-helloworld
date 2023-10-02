@@ -191,8 +191,8 @@ the name ``baremetal.bin``. Now, move the binary file to your build directory
 
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-setup
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR\
-    /baremetal-setup/baremetal.bin
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+    $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
 ```
 
 ### 2.2. Build Bao Hypervisor - Laying the Foundation
