@@ -99,6 +99,16 @@ having at least 13 GiB of free space available on your system. With your
 environment set up and all the dependencies installed, you're now ready to dive
 into the world of Bao hypervisor and create your virtualized wonders!
 
+| Component         | Required Space | Percentage of space Required |
+|-------------------|:--------------:|:---------------------------: |
+| Bao               | 155.8 MiB      | 1.23%                        |
+| Guest (Linux)     | 10.5 GiB       | 84.74%                       |
+| Guest (freeRTOS)  | 24.8 MiB       | 0.20%                        |
+| Guest (baremetal) | 4.2 MiB        | 0.03%                        |
+| Tools (QEMU)      | 1.7 GiB        | 13.74%                       |
+| Tools (u-boot)    | 237 MiB        | 1.87%                        |
+| Tools (ATF)       | 52 MiB         | 0.41%                        |
+
 ---
 
 ## 2. Initial setup - Taking the First Steps!
