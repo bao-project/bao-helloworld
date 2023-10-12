@@ -394,17 +394,14 @@ And you should have an output as follows:
 
 When you want to leave QEMU press `Ctrl-a` then `x`.
 
-## 5. Well, Maybe the Setup Was Not Perfect...
+## 5. Adjusting Your Setup
 
-As we continue on this thrilling tour, it's time to explore the art of changing
-your Bao setup. Mastering the ability to modify your virtual environment opens
-up endless possibilities. Don't worry if you encounter a few challenges along
-the way; learning through hands-on experience is the key!
-
-In the following sections, we'll walk you through step-by-step instructions to
-make various changes to your guests. By the end of this part of the tour,
-you'll have a deeper understanding of how the different components interact,
-and you'll be confidently making adjustments to suit your needs.
+As we progress, let's focus on fine-tuning your Bao setup. Having the ability to
+modify your virtual environment can be quite useful. In the upcoming sections,
+we'll provide you with detailed, step-by-step instructions to implement various
+changes to your guests. By the end of this segment, you'll have gained a deeper
+insight into how the different components interact, and you'll be skilfull at
+making the necessary adjustments to meet your requirements.
 
 ### 5.1 Add a second guest - freeRTOS
 
@@ -473,11 +470,16 @@ configuration:
 
 Next, we need to think about resources. In the first setup, we assigned 4 vCPUs
 to the baremetal. But this time, we need to split the vCPUs between the two
-VMs:
+VMs. For the baremetal, we will use 3 CPUs:
 
 ```diff
 - .cpu_num = 4,
 + .cpu_num = 3,
+```
+
+While for the freeRTOS VM, we will assign only one CPU:
+```diff
++ .cpu_num = 1,
 ```
 
 Additionally, we need to include all the configurations of the second VM.
@@ -531,7 +533,7 @@ cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS/bao.bin \
 
 #### 5.1.4. Ready for launch!
 
-Now, we have everything configured for testing our new setup! Just run the
+Now, you have everything configured for testing your new setup! Just run the
 following command:
 ```sh
 qemu-system-aarch64 -nographic \
@@ -551,9 +553,9 @@ Now, you should have an output as follows:
 
 [![asciicast][asciinema-image2]][asciinema-video2]
 
-### 5.2 It was still not perfect right? Let's try out a Linux too
+### 5.2 Adding Linux to the Mix
 
-Let's now introduce a third VM running the Linux OS.
+Now, let's introduce a third VM running the Linux OS.
 
 ![Init Setup](/img/triple-guest.svg)
 
@@ -619,9 +621,9 @@ mv $BUILDROOT_SRCS/output/images/Image\
     $BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt
 ```
 
-The device tree for this setup is available in srcs/devicetrees/
-qemu-aarch64-virt. For a device tree file named linux.dts define a environment
-variable and build:
+The device tree for this setup is available in ``srcs/devicetrees/``
+``qemu-aarch64-virt``. For a device tree file named ``linux.dts`` define a
+environment variable and build:
 
 ```sh
 export LINUX_VM=linux
@@ -647,10 +649,9 @@ cp $LINUX_DIR/linux-build/$LINUX_VM.bin \
 
 #### 5.2.2 Welcome our new guest!
 
-After building our new guest, it's time to integrate in our setup. You can find
-all details in the [configuration file](/configs/baremetal-freeRTOS-linux.c).
+After building our new guest, it's time to integrate it into our setup.
 
- After that, we need to load our guests:
+First, we need to load our guests:
 ```diff
 - VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/baremetal.bin));
 - VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/free-rtos.bin));
@@ -687,6 +688,10 @@ Then, we need to rearrange the number of vCPUs:
     }
 ```
 
+Additionally, you have the option to configure the Linux VM to integrate various
+devices and even memory regions. For specific details regarding this setup,
+refer to the the [configuration file](/configs/baremetal-freeRTOS-linux.c).
+
 #### 5.2.3. Let's rebuild Bao!
 
 As we've seen, changing the guests includes changing the configuration file.
@@ -718,10 +723,10 @@ cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
-#### 5.2.4. Ready to go!
+#### 5.2.4. Ready to Launch!
 
-With all the pieces in place, it's time to launch QEMU and behold the fruits of
-your labor. The moment of truth awaits, so let's dive right in:
+With all the necessary components in place, it's time to launch QEMU and see the
+results of your work. Let's proceed:
 
 ```sh
 qemu-system-aarch64 -nographic \
@@ -753,11 +758,11 @@ After all, you should see an output as follows:
 
 [![asciicast][asciinema-image3]][asciinema-video3]
 
-## 5.3 Guests must socialize, right?
+## 5.3 Facilitating Guest Interaction
 
-In certain scenarios, it's imperative for guests to establish a communication
-channel. To accomplish this, we'll utilize shared memory and Inter-Process
-Communication (IPC) mechanisms, allowing the Linux VM to seamlessly interact
+In specific scenarios, it's important for guests to establish a communication
+channel. To achieve this, we'll make use of shared memory and Inter-Process
+Communication (IPC) mechanisms, enabling the Linux VM to seamlessly interact
 with the system.
 
 ![Init Setup](/img/triple-guest-shmem.svg)
