@@ -259,7 +259,7 @@ make -C $BAO_SRCS\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal\
     CONFIG_BUILTIN=y\
-    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
 Upon completing these steps, you'll find a binary file in the BAO_SRCS
@@ -388,8 +388,8 @@ go 0x50000000
 ```
 And you should have an output as follows:
 
-[asciinema-video]: https://asciinema.org/a/MKcRliuI6Y3yXZrVCRi25jied
-[asciinema-image]: https://asciinema.org/a/MKcRliuI6Y3yXZrVCRi25jied.png
+[asciinema-video]: https://asciinema.org/a/Kn7yUQ6V7Hy1sB6OAsAjOCthK
+[asciinema-image]: https://asciinema.org/a/Kn7yUQ6V7Hy1sB6OAsAjOCthK.png
 
 [![asciicast][asciinema-image]][asciinema-video]
 
