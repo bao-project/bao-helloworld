@@ -421,6 +421,7 @@ Let's kick things off by incorporating a second VM running FreeRTOS.
 
 First, we can use the baremetal compiled from the first setup:
 ```sh
+mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup
 cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/baremetal.bin
 ```
@@ -478,7 +479,7 @@ VMs:
 
 ```diff
 - .cpu_num = 4,
-+ .cpu_num = 2,
++ .cpu_num = 3,
 ```
 
 Additionally, we need to include all the configurations of the second VM.
@@ -518,7 +519,7 @@ make -C $BAO_SRCS\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-freeRTOS\
     CONFIG_BUILTIN=y\
-    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
 Upon completing these steps, you'll find a binary file in the `BAO_SRCS`
@@ -545,6 +546,12 @@ qemu-system-aarch64 -nographic \
   -device virtio-serial-device -chardev pty,id=serial3 \
   -device virtconsole,chardev=serial3
 ```
+Now, you should have an output as follows:
+
+[asciinema-video2]: https://asciinema.org/a/qXdO7f7YqsfoXTRMnKlq8J6n5
+[asciinema-image2]: https://asciinema.org/a/qXdO7f7YqsfoXTRMnKlq8J6n5.png
+
+[![asciicast][asciinema-image2]][asciinema-video2]
 
 ### 5.2 It was still not perfect right? Let's try out a Linux too
 
