@@ -1,8 +1,8 @@
 #include <config.h>
 
-VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/baremetal.bin));
-VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/freertos.bin));
-VM_IMAGE(linux, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/linux.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-linux-setup/baremetal.bin));
+VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-linux-setup/free-rtos.bin));
+VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-linux-setup/linux.bin));
 
 struct config config = {
     
