@@ -1,0 +1,13 @@
+diff --git a/src/main.c b/src/main.c
+index c1a2413..1bf7361 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -52,7 +52,7 @@ void vTask(void *pvParameters)
+     unsigned long id = (unsigned long)pvParameters;
+     while (1)
+     {
+-        printf("Task%d: %d\n", id, counter++); 
++        printf("[freeRTOS] Task%d: %d\n", id, counter++); 
+         vTaskDelay(1000 / portTICK_PERIOD_MS);
+     }
+ }
