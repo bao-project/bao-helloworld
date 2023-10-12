@@ -342,9 +342,7 @@ dd if=$ATF_DIR/build/qemu/release/fip.bin\
 
 ## 4. Let's Try It Out! - Unleash the Power
 
-Now that the stage is set, it's time to witness the magic firsthand. Brace
-yourself as we ignite the virtual flames and bring your creation to life. Get
-ready for an experience like no other as we embark on this journey:
+Now that everything is set up, let's revise all the steps:
 
 :white_check_mark: Build guest (baremetal)
 
@@ -352,8 +350,8 @@ ready for an experience like no other as we embark on this journey:
 
 :white_check_mark: Build firmware (qemu)
 
-With all the pieces in place, it's time to launch QEMU and behold the fruits of
-your labor. The moment of truth awaits, so let's dive right in:
+Once everything is in place, we'll proceed with the QEMU launch. Here are the
+necessary commands:
 
 ```sh
 qemu-system-aarch64 -nographic\
