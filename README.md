@@ -565,7 +565,7 @@ mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup
 cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/baremetal.bin
 cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin \
-    $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/freertos.bin
+    $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/free-rtos.bin
 ```
 
 #### 5.2.1 Build Linux Guest
@@ -708,7 +708,7 @@ make -C $BAO_SRCS\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-freeRTOS-linux\
     CONFIG_BUILTIN=y\
-    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
 Upon completing these steps, you'll find a binary file in the `BAO_SRCS`
@@ -747,6 +747,13 @@ screen /dev/pts/4
 
 The Linux guest is also accessible via ssh at the static address 192.168.42.15.
 The password for root is root.
+
+After all, you should see an output as follows:
+
+[asciinema-video3]: https://asciinema.org/a/UZLyjpAM53eBJMYRCPEkSZsb8
+[asciinema-image3]: https://asciinema.org/a/UZLyjpAM53eBJMYRCPEkSZsb8.png
+
+[![asciicast][asciinema-image3]][asciinema-video3]
 
 ## 5.3 Guests must socialize, right?
 
