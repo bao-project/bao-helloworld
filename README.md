@@ -271,10 +271,9 @@ cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
 
 ## 3. Build Firmware - Powering Up Your Setup
 
-No journey is truly complete without firmware. It's the fuel that powers your
-virtual world. That's why we're here to guide you through acquiring the
-essential firmware tailored to your target platform (you can find the pointer
-to build the firmware to other platforms
+Firmware is essential to power your virtual world. That's why we're here to
+assist you in obtaining the necessary firmware tailored to your target platform
+(you can find the instructions to build the firmware for other platforms
 [here](https://github.com/bao-project/bao-demos#b5-build-firmware-and-deploy)).
 
 ### 3.1 Welcome to the QEMU platform!
