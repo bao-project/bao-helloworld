@@ -276,16 +276,16 @@ assist you in obtaining the necessary firmware tailored to your target platform
 (you can find the instructions to build the firmware for other platforms
 [here](https://github.com/bao-project/bao-demos#b5-build-firmware-and-deploy)).
 
-### 3.1 Welcome to the QEMU platform!
+### 3.1 Getting Started with the QEMU Platform
 
-Why bother with a hardware platform when you have QEMU? If you haven't got it
-yet, fret not. We're here to guide you through the process of building and
-installing it. In this guide, our focus will be on Aarch64 QEMU.
+QEMU provides a convenient alternative to a hardware platform. If you haven't
+installed it yet, don't worry. We're here to walk you through the process of
+building and installing it. In this guide, we'll focus on Aarch64 QEMU.
 
-However, if you're already equipped with qemu-system-aarch64, or if compiling
-isn't your cup of tea and you'd rather install it directly using a package
-manager or another method, ensure that you're working with version 7.2.0 or
-higher. In that case, you can jump ahead to the next step.
+However, if you already have qemu-system-aarch64, or if you'd prefer to install
+it directly using a package manager or another method, just make sure you're
+working with version 7.2.0 or higher. In that case, feel free to move on to the
+[next step](#32-now-you-need-u-boot).
 
 To install QEMU, simply run the following commands:
 
@@ -302,9 +302,9 @@ make -j$(nproc)
 sudo make install
 ```
 
-### 3.2 Now you need u-boot
+### 3.2 Installing u-boot
 
-To build and install u-boot, execute the following commands:
+To get u-boot up and running, simply execute the following commands:
 
 ```sh
 export UBOOT_DIR=$ROOT_DIR/tools/u-boot
@@ -322,9 +322,10 @@ make -j$(nproc)
 cp $UBOOT_DIR/u-boot.bin $TOOLS_DIR
 ```
 
-### 3.3 Almost there, let's build TF-A
+### 3.3 Let's Build TF-A
 
-One more tool to go! Let's build TF-A:
+We're almost there! Now, let's go ahead and build TF-A:
+
 ```sh
 export ATF_DIR=$ROOT_DIR/tools/arm-trusted-firmware
 git clone https://github.com/bao-project/arm-trusted-firmware.git\
