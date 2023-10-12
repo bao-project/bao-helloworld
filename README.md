@@ -823,9 +823,9 @@ Subsequently, compile it:
 make -C $BAO_SRCS\
     PLATFORM=qemu-aarch64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
-    CONFIG=baremetal-freeRTOS-linux\
+    CONFIG=baremetal-freeRTOS-linux-shmem\
     CONFIG_BUILTIN=y\
-    CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
+    CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
 Upon successful completion, you'll locate a binary file named bao.bin in the
