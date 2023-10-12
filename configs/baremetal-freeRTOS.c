@@ -1,7 +1,7 @@
 #include <config.h>
 
-VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/baremetal.bin));
-VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/free-rtos.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-setup/baremetal.bin));
+VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-setup/free-rtos.bin));
 
 struct config config = {
     
@@ -24,7 +24,7 @@ struct config config = {
             .entry = 0x50000000,
 
             .platform = {
-                .cpu_num = 2,
+                .cpu_num = 3,
                 
                 .region_num = 1,
                 .regions =  (struct vm_mem_region[]) {
@@ -68,7 +68,7 @@ struct config config = {
             .entry = 0x0,
 
             .platform = {
-                .cpu_num = 2,
+                .cpu_num = 1,
                 
                 .region_num = 1,
                 .regions =  (struct vm_mem_region[]) {
