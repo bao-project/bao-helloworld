@@ -126,6 +126,7 @@ commands:
 ```sh
 export ROOT_DIR=$(realpath .)
 export SETUP_BUILD=$ROOT_DIR/bin
+export PATCHES_DIR=$ROOT_DIR/patches
 
 export BUILD_GUESTS_DIR=$SETUP_BUILD/guests
 export BUILD_BAO_DIR=$SETUP_BUILD/bao
@@ -185,6 +186,7 @@ And now, let's compile it (for simplicity, our example includes a Makefile to
 compile the baremetal compilation):
 
 ```sh
+git -C $BAREMETAL_SRCS apply $PATCHES_DIR/baremetal.patch
 make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
 ```
 
@@ -215,9 +217,9 @@ classic_config) to help.
 VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
 ```
 
-> :warning: **Warning:** If you are using a directory structure of the one
-> presented in the tutorial, please make sure to update the following code in
-> the [configuration file](configs/baremetal.c).
+:warning: If you are using a directory structure of the one presented in the
+tutorial, please make sure to update the following code in the
+[configuration file](configs/baremetal.c).
 
 Undoubtedly, if we're envisioning our baremetal system dancing atop the
 hypervisor stage, we first need that hypervisor in place. Fear not, for our
@@ -433,6 +435,7 @@ export FREERTOS_PARAMS="STD_ADDR_SPACE=y"
 git clone --recursive --shallow-submodules\
     https://github.com/bao-project/freertos-over-bao.git\
     $FREERTOS_SRCS --branch demo
+git -C $FREERTOS_SRCS apply $PATCHES_DIR/freeRTOS.patch
 make -C $FREERTOS_SRCS PLATFORM=qemu-aarch64-virt $FREERTOS_PARAMS
 ```
 
@@ -773,9 +776,8 @@ dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
     $LINUX_DIR/linux-build/$LINUX_VM.dtb
 ```
 
-> :warning: **Warning:**: To correctly introduce these changes, you need to
-> ensure that you applied the patch to Linux, as described
-> [before](#521-build-linux-guest).
+:warning: To correctly introduce these changes, you need to ensure that you
+applied the patch to Linux, as described [before](#521-build-linux-guest).
 
 Bundle the kernel image and device tree blob into a single binary:
 ```sh
