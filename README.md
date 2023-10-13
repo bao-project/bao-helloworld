@@ -333,7 +333,7 @@ dd if=$ATF_DIR/build/qemu/release/fip.bin\
 
 ## 4. Let's Try It Out! - Unleash the Power
 
-Now that everything is set up, let's revise all the steps:
+Now that everything is set up, let's revise all the steps performed yet:
 
 :white_check_mark: Build guest (baremetal)
 
@@ -341,8 +341,8 @@ Now that everything is set up, let's revise all the steps:
 
 :white_check_mark: Build firmware (qemu)
 
-Once everything is in place, we'll proceed with the QEMU launch. Here are the
-necessary commands:
+Once everything is in place, we'll proceed with the QEMU launch. This is the
+command to run:
 
 ```sh
 qemu-system-aarch64 -nographic\
@@ -356,9 +356,9 @@ qemu-system-aarch64 -nographic\
    -device virtconsole,chardev=serial3
 ```
 
-Now, you should see TF-A and U-boot initialization messages. After, set up
-connections and jump into the world of Bao. QEMU will reveal the
-pseudoterminals where it placed the virtio serial. Here's an example:
+Now, you should see TF-A and U-Boot initialization log. Now, let's set up
+connections and jump into Bao. QEMU will reveal the pseudo-terminals that where
+placed in the virtio serial. Here's an example:
 
 ```sh
 char device redirected to /dev/pts/4 (label serial3)
@@ -371,7 +371,7 @@ to the specified pseudoterminal. Here's how:
 screen /dev/pts/4
 ```
 
-Finally, make u-boot jump to where the bao image was loaded:
+Finally, make U-Boot jump to where the bao image was loaded:
 ```sh
 go 0x50000000
 ```
@@ -383,7 +383,7 @@ And you should have an output as follows:
 [![asciicast][asciinema-image]][asciinema-video]
 
 
-When you want to leave QEMU press `Ctrl-a` then `x`.
+To exit QEMU hold press `Ctrl-A` then `X`.
 
 ## 5. Adjusting Your Setup
 
