@@ -2,44 +2,40 @@
 
 Welcome to the Bao Hypervisor! Get ready for an interactive journey as we
 explore the world of Bao together. Whether you're a seasoned Bao user or a
-newcomer, this tour is designed to give you a practical and enthusiastic
-introduction to our powerful hypervisor.
+newcomer, this tour is designed to give you a practical introduction to the Bao
+hypervisor.
 
 If you're already familiar with Bao or want to dive into specific setups
-provided by our team, feel free to skip ahead to the Bao demos section.
+provided by our team, feel free to skip ahead to the [Bao demos 
+repository](https://github.com/bao-project/bao-demos).
 
 In this guide, we will take a tour of the different components required to
 build a setup using the Bao hypervisor and learn how the different components
 interact. For this purpose, the guide contains the following topics:
 
-- A **getting started** to help users on preparing the environment to build the
-  setup and also some pointers to documentations of Bao (in case you want to go
-  deeper in any detail);
+- A **getting started** section that helps users to prepare the environment
+  where we will build the target setups. We also provide extra detailed
+  documentation notes regarding some implementation aspects of the hypervisor;
 
-- An **initial setup** for giving the first steps on this tour. This section
-  aims to explore the different components of the system and get the first
-  practical example of this guide;
-
+- An **initial setup** section that explores the different components of the
+  system and gets the first practical example of this guide;
 - An **interactive tutorial on changing the guests** running on top of Bao;
-
 - A **practical example** of changing the setup running;
-
 - An example of **how different guests can coexist and interact** with each
   other;
 
 ## 1. Getting Started
 
-Before we dive into the thrilling aspects of Bao, let's make sure you're all
-set up and ready to go. In this section, we'll guide you through preparing your
-environment to build the setup. Don't worry; we'll provide you with helpful
-pointers to Bao's documentation in case you want to explore any details
-further.
+In this section, we'll guide you through preparing a development environment to
+build Bao. Don't worry; we'll provide you with helpful pointers to Bao's
+implementation details in case you want to explore any further.
 
 ### 1.1 Recommended Operating System: Linux (e.g., Ubuntu 22.04)
-To make the most of this tutorial and the Bao hypervisor, we recommend using a
-Linux-based operating system. While the instructions may work on other
-platforms, our focus is on Linux, specifically Ubuntu 22.04 or older versions.
-This will ensure compatibility and an optimal experience throughout the tour.
+We recommend using a Linux-based operating system to make the most of this
+tutorial and the Bao hypervisor. While the instructions may work on other
+platforms, this guide is set up on top of a Linux-based machine, specifically
+Ubuntu 22.04. This will ensure compatibility and an optimal experience
+throughout the tour.
 
 ### 1.2 Installing Required Dependencies
 Before we can dive into the world of Bao, we need to install several
@@ -71,8 +67,7 @@ pip3 install pykwalify packaging pyelftools
 
 Before we delve deeper, let's ensure you have the right tools at your disposal.
 We'll guide you through obtaining and configuring the appropriate cross-compile
-toolchain for your target architecture. This step is essential for a smooth
-development experience.
+toolchain for your target architecture.
 
 |  Architecture  | Toolchain Name       | Download Link                    |
 |----------------|:--------------------:|:--------------------------------:|
@@ -84,8 +79,9 @@ development experience.
 
 #### 1.3.2. Installing and Configuring the Toolchain
 
-Install the toolchain. Then, set the **CROSS_COMPILE** environment variable
-with the reference toolchain prefix path:
+Download the pre-build binary packages of the appropriate toolchain for your
+target architecture. Then, set the **CROSS_COMPILE** environment variable with
+the reference toolchain prefix path:
 
 ```sh
 export CROSS_COMPILE=/path/to/toolchain/install/dir/bin/your-toolchain-prefix-
@@ -93,12 +89,12 @@ export CROSS_COMPILE=/path/to/toolchain/install/dir/bin/your-toolchain-prefix-
 
 ### 1.4 Ensuring Enough Free Space
 
-Please be aware that sufficient free space is crucial for this journey,
-especially due to the Linux image that will be built for the Linux guest VM.
-To ensure a smooth experience and avoid any space-related issues, we recommend
-having at least 13 GiB of free space available on your system. With your
-environment set up and all the dependencies installed, you're now ready to dive
-into the world of Bao hypervisor and create your virtualized wonders!
+Please note that having sufficient free space is important for a smooth
+experience, particularly because of the Linux image that will be built for the
+Linux guest VM. To prevent any space-related issues, we suggest having a
+minimum of 13 GiB of free space available on your system. With your environment
+set up and all the dependencies installed, you are now prepared to explore the
+Bao hypervisor and create your first virtualized environment.
 
 | Component         | Required Space | Percentage of space Required |
 |-------------------|:--------------:|:---------------------------: |
