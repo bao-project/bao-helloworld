@@ -114,10 +114,9 @@ Now that you're geared up, it's time to take the first steps on this tour. In
 the Initial Setup section, we'll explore the different components of the system
 and walk you through a practical example to give you a solid foundation.
 
-To ensure a smooth journey ahead, let's start by creating a development
-environment. We'll begin by establishing a directory structure for the various
-components of our setups. Open up your terminal and execute the following
-commands:
+We'll begin by configuring a development environment and establishing a
+directory tree to hold the several components needed. Open up your terminal and
+execute the following commands:
 
 ```sh
 export ROOT_DIR=$(realpath .)
@@ -133,7 +132,8 @@ mkdir -p $BUILD_BAO_DIR
 mkdir -p $BUILD_FIRMWARE_DIR
 ```
 
-Upon completing these commands, your directory should resemble the following:
+Upon completing these commands, your directory tree should look like this:
+
 ``` sh
 ├── bin
 │   ├── bao
@@ -146,22 +146,22 @@ Upon completing these commands, your directory should resemble the following:
 └──README.md
 ```
 
-### 2.1. Build Guest - Building Your First Bao Guest
+### 2.1. Building Your First Bao Guest
 
 [bao-demos-platforms]: https://github.com/bao-project/bao-demos#appendix-i
 
-Let's kickstart your journey by building your inaugural Bao guest! Here, you'll
-gain hands-on experience crafting a Baremetal Guest. Let's get that virtual
-machine up and running!But before we dive into the hands-on excitement, let's
-understand the setup we're crafting. Our goal is to deploy a baremetal system
-atop the Bao hypervisor, as illustrated in the figure below:
+Let's start the journey of building your first Bao guest. Here, you'll acquire
+hands-on experience in creating a Baremetal guest. Before we move on to the
+practical aspects, let's first understand the setup we're building. Our goal is
+to deploy a baremetal guest on top of the Bao hypervisor, as shown in the
+figure below:
 
 ![Init Setup](/img/single-guest.svg)
 
 :information_source: For the sake of simplicity and accessibility, we'll detach
 from physical hardware and use QEMU (don't worry, we'll guide you through its
 installation later in the tutorial). However, remember that you can apply these
-steps to various [other platforms][arm-toolchains].
+steps to various [other platforms][bao-demos-platforms].
 
 
 To start, let's define an environment variable for the baremetal app source
@@ -187,9 +187,9 @@ make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
 ```
 
 Upon completing these steps, you'll find a binary file in the
-``BAREMETAL_SRCS`` directory. If you followed our provided Makefile, this
-precious gem will bear the name ``baremetal.bin``. Now, move the binary file to
-your build directory (``BUILD_GUESTS_DIR``):
+``BAREMETAL_SRCS`` directory. If you followed our provided Makefile, the binary
+takes the name ``baremetal.bin``. Now, move the binary file to your build
+directory (``BUILD_GUESTS_DIR``):
 
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-setup
@@ -198,30 +198,24 @@ cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
 ```
 
 ### 2.2. Build Bao Hypervisor - Laying the Foundation
-Next up, we'll guide you through building the Bao Hypervisor itself. This
-critical step forms the backbone of your virtualization environment.
-
-Our first stride in this journey involves configuring the hypervisor using
-Bao's configuration file. For this specific setup, we're offering you the
-[configuration file](configs/baremetal.c) to ease the process. If you're
-curious to explore different configuration options, our detailed our detailed
-Bao config documentation is
+Next up, we'll guide you through building the Bao Hypervisor itself. The first
+step involves configuring the hypervisor using Bao's configuration file. For
+this specific setup, we're providing you the [configuration
+file](configs/baremetal.c) to ease the process. If you're curious to explore
+different configuration options, our detailed Bao config documentation is
 [here](https://github.com/bao-project/bao-docs/tree/wip/bao-\
 classic_config) to help.
-
-```c
-VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
-```
 
 :warning: If you are using a directory structure of the one presented in the
 tutorial, please make sure to update the following code in the
 [configuration file](configs/baremetal.c).
 
-Undoubtedly, if we're envisioning our baremetal system dancing atop the
-hypervisor stage, we first need that hypervisor in place. Fear not, for our
-adept team has already shouldered the arduous task. Bao stands ready and
-waiting for you to harness its power. No need to roll up your sleeves; it's a
-breeze. Let's embark on this stage-setting journey:
+```c
+VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
+```
+
+Now we must build Bao. There's no need for any complex setup; it's
+straightforward. Let's begin this stage-setting process:
 
 #### 2.2.1. Cloning the Bao Hypervisor
 Your gateway to seamless virtualization begins with cloning the Bao Hypervisor
@@ -236,18 +230,17 @@ git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
 
 #### 2.2.2. Copying Your Configuration
 
-Now, let's ensure your unique configuration is seamlessly integrated. Copy your
-configuration file to the working directory with the following commands:
+Now, let's ensure that the configuration is copied to the working directory
+with the following commands:
 
 ```sh
 mkdir -p $mkdir -p $BUILD_BAO_DIR/config
-cp -L $ROOT_DIR/configs/baremetal.c\
-    $BUILD_BAO_DIR/config/baremetal.c
+cp -L $ROOT_DIR/configs/baremetal.c $BUILD_BAO_DIR/config/baremetal.c
 ```
 
 #### 2.2.3. Compiling Bao Hypervisor
-With all set, it's time to bring your Bao Hypervisor to life. You now just need
-to compile it!
+We are all set! It's time to bring the Bao Hypervisor to life. Now, we just
+need to compile it!
 
 ```sh
 make -C $BAO_SRCS\
@@ -258,8 +251,9 @@ make -C $BAO_SRCS\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
-Upon completing these steps, you'll find a binary file in the BAO_SRCS
-directory, called bao.bin. Now, move the binary file to your build directory:
+Upon completing these steps, you'll find a binary file in the `BAO_SRCS`
+directory called `bao.bin`. Now, let's move the binary file to your build
+directory:
 
 ```sh
 cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
