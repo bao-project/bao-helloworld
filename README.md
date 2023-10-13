@@ -391,15 +391,14 @@ As we progress, let's focus on fine-tuning your Bao setup. Having the ability to
 modify your virtual environment can be quite useful. In the upcoming sections,
 we'll provide you with detailed, step-by-step instructions to implement various
 changes to your guests. By the end of this segment, you'll have gained a deeper
-insight into how the different components interact, and you'll be skilfull at
+insight into how the different components interact, and you'll be skilful at
 making the necessary adjustments to meet your requirements.
 
 ### 5.1 Add a second guest - freeRTOS
 
 In this section, we'll delve into various scenarios and demonstrate how to
-configure specific environments using Bao. One of Bao's notable strengths lies
-in its flexibility, allowing you to tailor your setup to a range of
-requirements.
+configure specific environments using Bao. Let's kick things off by
+incorporating a second VM running FreeRTOS.
 
 Let's kick things off by incorporating a second VM running FreeRTOS.
 
@@ -438,10 +437,10 @@ cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin \
 
 #### 5.1.2. Integrating the new guest
 
-Now, we have both guests needed for our setup. However, there are some steps
-required to fit the two VMs on our platform. Let's understand the differences
-between the configuration of the first setup and the configuration of the
-second setup.
+Now, we have both guests compiled and ready for our dual-guest setup. However,
+there are some steps required to fit the two VMs on our platform. Let's
+understand the differences between the configuration of the first setup and the
+configuration of the second setup.
 
 First of all, we need to add the second VM image:
 
@@ -578,7 +577,7 @@ cd $LINUX_SRCS
 git apply $ROOT_DIR/srcs/patches/$LINUX_VERSION/*.patch
 ```
 
-Setup and environment variable pointing to the target architecture and platform
+Setup an environment variable pointing to the target architecture and platform
 specific config to be used by buildroot:
 
 ```sh
@@ -601,8 +600,8 @@ git clone https://github.com/buildroot/buildroot.git $BUILDROOT_SRCS\
 cd $BUILDROOT_SRCS
 ```
 
-Use our provided buildroot defconfig, which itselfs points to the a Linux
-kernel defconfig and patches and build.
+Use our provided buildroot defconfig, which points to the a Linux kernel
+defconfig and patches and build.
 
 ```sh
 make defconfig BR2_DEFCONFIG=$BUILDROOT_DEFCFG
@@ -679,9 +678,10 @@ Then, we need to rearrange the number of vCPUs:
     }
 ```
 
-Additionally, you have the option to configure the Linux VM to integrate various
-devices and even memory regions. For specific details regarding this setup,
-refer to the the [configuration file](/configs/baremetal-freeRTOS-linux.c).
+Additionally, you have the option to configure the Linux VM to integrate
+various devices and even memory regions. For specific details regarding this
+setup, refer to the the [configuration
+file](/configs/baremetal-freeRTOS-linux.c).
 
 #### 5.2.3. Let's rebuild Bao!
 
@@ -752,9 +752,9 @@ After all, you should see an output as follows:
 ## 5.3 Facilitating Guest Interaction
 
 In specific scenarios, it's important for guests to establish a communication
-channel. To achieve this, we'll make use of shared memory and Inter-Process
-Communication (IPC) mechanisms, enabling the Linux VM to seamlessly interact
-with the system.
+channel. To achieve this, we'll make use of a shared memory object and
+Inter-Process Communication (IPC) mechanisms, enabling the Linux VM to
+seamlessly interact with the system.
 
 ![Init Setup](/img/triple-guest-shmem.svg)
 
