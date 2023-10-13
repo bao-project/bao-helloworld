@@ -270,10 +270,11 @@ assist you in obtaining the necessary firmware tailored to your target platform
 
 QEMU provides a convenient alternative to a hardware platform. If you haven't
 installed it yet, don't worry. We're here to walk you through the process of
-building and installing it. In this guide, we'll focus on Aarch64 QEMU.
+building and installing it. In this guide, we'll target the Aarch64
+architecture.
 
-However, if you already have qemu-system-aarch64, or if you'd prefer to install
-it directly using a package manager or another method, just make sure you're
+If you already have qemu-system-aarch64, or if you'd prefer to install it
+directly using a package manager or another method, just make sure you're
 working with version 7.2.0 or higher. In that case, feel free to move on to the
 [next step](#32-now-you-need-u-boot).
 
@@ -292,9 +293,9 @@ make -j$(nproc)
 sudo make install
 ```
 
-### 3.2 Installing u-boot
+### 3.2 Installing U-Boot
 
-To get u-boot up and running, simply execute the following commands:
+To get U-Boot up and running, simply execute the following commands:
 
 ```sh
 export UBOOT_DIR=$ROOT_DIR/tools/u-boot
@@ -312,7 +313,7 @@ make -j$(nproc)
 cp $UBOOT_DIR/u-boot.bin $TOOLS_DIR
 ```
 
-### 3.3 Let's Build TF-A
+### 3.3 Let's Build the TrustedFirmware-A
 
 We're almost there! Now, let's go ahead and build TF-A:
 
