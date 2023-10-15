@@ -1,0 +1,78 @@
+diff --git a/src/main.c b/src/main.c
+index 2233486..bbc09c4 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -30,8 +30,51 @@
+ 
+ spinlock_t print_lock = SPINLOCK_INITVAL;
+ 
++#define SHMEM_IRQ_ID (52)
++
++char* const baremetal_message = (char*)0x70000000;
++char* const linux_message    = (char*)0x70002000;
++const size_t shmem_channel_size = 0x2000;
++
++void shmem_update_msg(int irq_count) {
++    sprintf(baremetal_message, "Bao baremetal guest received %d uart interrupts!\n",
++        irq_count);
++}
++
++char* strnchr(const char* s, size_t n, char c) {
++    for (size_t i = 0; i < n; i++) {
++        if (s[i] == c) {
++            return (char*)s + i;
++        }
++    }
++    return NULL;
++}
++
++void shmem_handler() {
++    linux_message[shmem_channel_size-1] = '\0';
++    char* end = strchr(linux_message, '\n');
++    if (end != NULL) {
++        *end = '\0';
++    }
++    printf("[baremetal] message from linux: %s\n", linux_message);
++}
++
++void shmem_init() {
++    memset(baremetal_message, 0, shmem_channel_size);
++    memset(linux_message, 0, shmem_channel_size);
++    shmem_update_msg(0);
++    irq_set_handler(SHMEM_IRQ_ID, shmem_handler);
++    irq_set_prio(SHMEM_IRQ_ID, IRQ_MAX_PRIO);
++    irq_enable(SHMEM_IRQ_ID);
++}
++
++void uart_rx_handler(){
++    static int irq_count = 0;
++    uart_clear_rxirq();
++    shmem_update_msg(irq_count);
++}
++
+ void timer_handler(){
+-    printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
+     timer_set(TIMER_INTERVAL);
+     irq_send_ipi(1ull << (get_cpuid() + 1));
+ }
+@@ -46,7 +89,10 @@ void main(void){
+         spin_unlock(&print_lock);
+ 
+         irq_set_handler(TIMER_IRQ_ID, timer_handler);
++        irq_set_handler(UART_IRQ_ID, uart_rx_handler);
+         
++        uart_enable_rxirq();
++
+         timer_set(TIMER_INTERVAL);
+         irq_enable(TIMER_IRQ_ID);
+         irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
+@@ -54,6 +100,9 @@ void main(void){
+         master_done = true;
+     }
+ 
++    irq_enable(UART_IRQ_ID);
++    irq_set_prio(UART_IRQ_ID, IRQ_MAX_PRIO);
++
+     while(!master_done);
+     spin_lock(&print_lock);
+     printf("[baremetal] cpu %d up\n", get_cpuid());
