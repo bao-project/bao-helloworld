@@ -98,3 +98,16 @@ index eabe347..7e2efd5 100644
      spin_unlock(&print_lock);
  
      while(1) wfi();
+diff --git a/src/platform/qemu-aarch64-virt/inc/plat.h b/src/platform/qemu-aarch64-virt/inc/plat.h
+index 5e4fca6..5a3374d 100644
+--- a/src/platform/qemu-aarch64-virt/inc/plat.h
++++ b/src/platform/qemu-aarch64-virt/inc/plat.h
+@@ -2,7 +2,7 @@
+ #define PLAT_H
+ 
+ #define PLAT_MEM_BASE 0x50000000
+-#define PLAT_MEM_SIZE 0x30000000
++#define PLAT_MEM_SIZE 0x4000000
+ 
+ #define PLAT_GICD_BASE_ADDR (0x08000000)
+ #define PLAT_GICC_BASE_ADDR (0x08010000)
