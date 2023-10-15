@@ -1,8 +1,8 @@
 diff --git a/src/main.c b/src/main.c
-index eabe347..7e2efd5 100644
+index eabe347..2233486 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -30,62 +30,6 @@
+@@ -30,64 +30,8 @@
  
  spinlock_t print_lock = SPINLOCK_INITVAL;
  
@@ -63,18 +63,22 @@ index eabe347..7e2efd5 100644
 -}
 -
  void timer_handler(){
-     printf("cpu%d: %s\n", get_cpuid(), __func__);
+-    printf("cpu%d: %s\n", get_cpuid(), __func__);
++    printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
      timer_set(TIMER_INTERVAL);
-@@ -101,31 +45,16 @@ void main(void){
+     irq_send_ipi(1ull << (get_cpuid() + 1));
+ }
+@@ -101,31 +45,18 @@ void main(void){
          printf("Bao bare-metal test guest\n");
          spin_unlock(&print_lock);
  
 -        irq_set_handler(UART_IRQ_ID, uart_rx_handler);
--        irq_set_handler(TIMER_IRQ_ID, timer_handler);
+         irq_set_handler(TIMER_IRQ_ID, timer_handler);
 -        irq_set_handler(IPI_IRQ_ID, ipi_handler);
 -
 -        uart_enable_rxirq();
 -
++        
          timer_set(TIMER_INTERVAL);
          irq_enable(TIMER_IRQ_ID);
          irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
