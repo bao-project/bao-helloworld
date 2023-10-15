@@ -619,11 +619,9 @@ Now, let's introduce a third VM running the Linux OS.
 
 First, we can re-use our guests from the previous setup:
 ```sh
-mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup
+mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-setup
 cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
-    $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/baremetal.bin
-cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin \
-    $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/free-rtos.bin
+    $BUILD_GUESTS_DIR/baremetal-linux-setup/baremetal.bin
 ```
 
 #### 5.3.1 Build Linux Guest
@@ -701,7 +699,7 @@ make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
 Finaly, copy the binary file to the (compiled) guests folder:
 ```sh
 cp $LINUX_DIR/linux-build/$LINUX_VM.bin \
-    $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/linux.bin
+    $BUILD_GUESTS_DIR/baremetal-linux-setup/linux.bin
 ```
 
 
@@ -712,10 +710,8 @@ After building our new guest, it's time to integrate it into our setup.
 First, we need to load our guests:
 ```diff
 - VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/baremetal.bin));
-- VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/free-rtos.bin));
-+ VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/baremetal.bin));
-+ VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/free-rtos.bin));
-+ VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-linux-setup/linux.bin));
++ VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-linux-setup/baremetal.bin));
++ VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-linux-setup/linux.bin));
 ```
 
 Let's now update our VM list size to integrate our new guest:
@@ -732,24 +728,15 @@ Then, we need to rearrange the number of vCPUs:
 +       .cpu_num = 1,
         ...
     },
-
-    // freeRTOS configuration
-    {
--       .cpu_num = 2,
-+       .cpu_num = 1,
-        ...
-    },
-
     // linux configuration
     {
-+       .cpu_num = 2,
++       .cpu_num = 3,
     }
 ```
 
 Additionally, you have the option to configure the Linux VM to integrate
 various devices and even memory regions. For specific details regarding this
-setup, refer to the the [configuration
-file](/configs/baremetal-freeRTOS-linux.c).
+setup, refer to the the [configuration file](/configs/baremetal-linux.c).
 
 #### 5.3.3. Let's rebuild Bao!
 
@@ -759,8 +746,8 @@ configuration file to the working directory with the following commands:
 
 ```sh
 mkdir -p $mkdir -p $BUILD_BAO_DIR/config
-cp -L $ROOT_DIR/configs/baremetal-freeRTOS-linux.c\
-    $BUILD_BAO_DIR/config/baremetal-freeRTOS-linux.c
+cp -L $ROOT_DIR/configs/baremetal-linux.c\
+    $BUILD_BAO_DIR/config/baremetal-linux.c
 ```
 
 Then, you just need to compile it:
@@ -768,7 +755,7 @@ Then, you just need to compile it:
 make -C $BAO_SRCS\
     PLATFORM=qemu-aarch64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
-    CONFIG=baremetal-freeRTOS-linux\
+    CONFIG=baremetal-linux\
     CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
@@ -778,7 +765,7 @@ directory, called `bao.bin`. Move the binary file to your build directory
 (`BUILD_BAO_DIR`):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux/bao.bin \
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-linux/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
@@ -830,7 +817,7 @@ seamlessly interact with the system.
 ### 5.4.1. Add Shared Memory and IPC to our guest
 Let's kick off by integrating an IPC into Linux. To do this, we'll make the
 necessary additions to the Linux device-tree. For simplicity, the
-[linux-shmem.dts](/configs/baremetal-freeRTOS-linux-shmem.c) file already
+[linux-shmem.dts](/configs/baremetal-linux-shmem.c) file already
 encompasses the following changes:
 
 ```diff
@@ -867,7 +854,7 @@ make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
 Finally, move the binary file to the (compiled) guests folder:
 ```sh
 cp $LINUX_DIR/linux-build/$LINUX_VM.bin \
-    $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/$LINUX_VM.bin
+    $BUILD_GUESTS_DIR/baremetal-linux-setup/$LINUX_VM.bin
 ```
 
 ### 5.4.2. Rebuild Bao
@@ -876,8 +863,8 @@ Given that you've modified one of the guests, it's now essential to rebuild
 Bao:
 ```sh
 mkdir -p $mkdir -p $BUILD_BAO_DIR/config
-cp -L $ROOT_DIR/configs/baremetal-freeRTOS-linux.c\
-    $BUILD_BAO_DIR/config/baremetal-freeRTOS-linux.c
+cp -L $ROOT_DIR/configs/baremetal-linux.c\
+    $BUILD_BAO_DIR/config/baremetal-linux.c
 ```
 
 Subsequently, compile it:
@@ -885,7 +872,7 @@ Subsequently, compile it:
 make -C $BAO_SRCS\
     PLATFORM=qemu-aarch64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
-    CONFIG=baremetal-freeRTOS-linux-shmem\
+    CONFIG=baremetal-linux-shmem\
     CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
@@ -894,7 +881,7 @@ Upon successful completion, you'll locate a binary file named bao.bin in the
 ``BAO_SRCS`` directory. Move it to your build directory (``BUILD_BAO_DIR``):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux/bao.bin \
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-linux/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
