@@ -1,8 +1,8 @@
 diff --git a/src/main.c b/src/main.c
-index 2233486..bbc09c4 100644
+index 2233486..66f30f9 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -30,8 +30,51 @@
+@@ -30,6 +30,50 @@
  
  spinlock_t print_lock = SPINLOCK_INITVAL;
  
@@ -51,11 +51,9 @@ index 2233486..bbc09c4 100644
 +}
 +
  void timer_handler(){
--    printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
+     printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
      timer_set(TIMER_INTERVAL);
-     irq_send_ipi(1ull << (get_cpuid() + 1));
- }
-@@ -46,7 +89,10 @@ void main(void){
+@@ -46,14 +90,22 @@ void main(void){
          spin_unlock(&print_lock);
  
          irq_set_handler(TIMER_IRQ_ID, timer_handler);
@@ -66,7 +64,9 @@ index 2233486..bbc09c4 100644
          timer_set(TIMER_INTERVAL);
          irq_enable(TIMER_IRQ_ID);
          irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
-@@ -54,6 +100,9 @@ void main(void){
+ 
++        shmem_init();
++
          master_done = true;
      }
  
