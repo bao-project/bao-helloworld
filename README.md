@@ -815,10 +815,27 @@ seamlessly interact with the system.
 
 
 ### 5.4.1. Add Shared Memory and IPC to our guest
-Let's kick off by integrating an IPC into Linux. To do this, we'll make the
-necessary additions to the Linux device-tree. For simplicity, the
-[linux-shmem.dts](/configs/baremetal-linux-shmem.c) file already
-encompasses the following changes:
+
+Let's start by changin our baremetal to handle messages sent via IPC. We've
+prepared a patch that can be applied directly to the baremetal source code.
+To apply the changes, use the following command:
+```sh
+git -C $BAREMETAL_SRCS apply $PATCHES_DIR/baremetal_shmem.patch
+```
+
+Next, rebuild the baremetal:
+
+```sh
+make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
+
+mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+    $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/baremetal.bin
+
+```
+Now, let's integrate an IPC into Linux. For simplicity, the
+[linux-shmem.dts](/configs/baremetal-linux-shmem.c) file already includes the
+following changes.
 
 ```diff
 +    bao-ipc@f0000000 {
@@ -854,7 +871,7 @@ make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
 Finally, move the binary file to the (compiled) guests folder:
 ```sh
 cp $LINUX_DIR/linux-build/$LINUX_VM.bin \
-    $BUILD_GUESTS_DIR/baremetal-linux-setup/$LINUX_VM.bin
+    $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM.bin
 ```
 
 ### 5.4.2. Rebuild Bao
