@@ -375,12 +375,10 @@ Finally, make U-Boot jump to where the bao image was loaded:
 ```sh
 go 0x50000000
 ```
-And you should have an output as follows:
+And you should have an output as follows (video
+[here](https://asciinema.org/a/613609)):
 
-[asciinema-video]: https://asciinema.org/a/Kn7yUQ6V7Hy1sB6OAsAjOCthK
-[asciinema-image]: https://asciinema.org/a/Kn7yUQ6V7Hy1sB6OAsAjOCthK.png
-
-[![asciicast][asciinema-image]][asciinema-video]
+![baremetal](/img/.gif/baremetal.gif)
 
 
 To exit QEMU hold press `Ctrl-A` then `X`.
@@ -604,12 +602,10 @@ qemu-system-aarch64 -nographic \
   -device virtio-serial-device -chardev pty,id=serial3 \
   -device virtconsole,chardev=serial3
 ```
-Now, you should have an output as follows:
+Now, you should have an output as follows (video
+[here](https://asciinema.org/a/613622)):
 
-[asciinema-video2]: https://asciinema.org/a/qXdO7f7YqsfoXTRMnKlq8J6n5
-[asciinema-image2]: https://asciinema.org/a/qXdO7f7YqsfoXTRMnKlq8J6n5.png
-
-[![asciicast][asciinema-image2]][asciinema-video2]
+![baremetal-freeRTOS](/img/.gif/baremetal_freeRTOS.gif)
 
 ### 5.3 Adding Linux to the Mix
 
@@ -797,12 +793,10 @@ screen /dev/pts/4
 The Linux guest is also accessible via ssh at the static address 192.168.42.15.
 The password for root is root.
 
-After all, you should see an output as follows:
+After all, you should see an output as follows (video
+[here](https://asciinema.org/a/616290)):
 
-[asciinema-video3]: https://asciinema.org/a/UZLyjpAM53eBJMYRCPEkSZsb8
-[asciinema-image3]: https://asciinema.org/a/UZLyjpAM53eBJMYRCPEkSZsb8.png
-
-[![asciicast][asciinema-image3]][asciinema-video3]
+![baremetal-linux](/img/.gif/baremetal_linux.gif)
 
 ## 5.4 Facilitating Guest Interaction
 
@@ -925,9 +919,10 @@ running the following command:
 ls /dev
 ```
 
-You'll see your IPC as depicted in the following image:
+You'll see your IPC as follows (video
+[here](https://asciinema.org/a/616289)):
 
-![Init Setup](/img/shmem-IPC.png)
+![baremetal-linux-shmem](/img/.gif/baremetal_linux_shmem.gif)
 
 From here, you can employ the IPC on Linux to dispatch messages to FreeRTOS by
 writing to ``/dev/baoipc0``:
