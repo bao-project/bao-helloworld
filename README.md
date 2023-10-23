@@ -158,11 +158,10 @@ figure below:
 
 ![Init Setup](/img/single-guest.svg)
 
-:information_source: For the sake of simplicity and accessibility, we'll detach
-from physical hardware and use QEMU (don't worry, we'll guide you through its
-installation later in the tutorial). However, remember that you can apply these
-steps to various [other platforms][bao-demos-platforms].
-
+:information_source: For the sake of simplicity and accessibility, we'll use
+the QEMU emulator (don't worry, we'll guide you through its installation later
+in the tutorial). However, remember that you can apply these steps to various
+[other platforms][bao-demos-platforms].
 
 To start, let's define an environment variable for the baremetal app source
 code:
