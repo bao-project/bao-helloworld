@@ -781,9 +781,8 @@ qemu-system-aarch64 -nographic \
   -device virtconsole,chardev=serial3
 ```
 
-The platform's first available UART is assigned to the baremetal and the
-FreeRTOS guests. In this manner, you can connect to them using the following
-command:
+To make the connection, open a fresh terminal window and establish a connection
+to the specified pseudoterminal. Here's how:
 
 ```sh
 screen /dev/pts/4
