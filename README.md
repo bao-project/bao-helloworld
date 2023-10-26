@@ -711,8 +711,8 @@ First, we need to load our guests:
 
 Let's now update our VM list size to integrate our new guest:
 ```diff
--    .vmlist_size = 2,
-+    .vmlist_size = 3,
+-    .vmlist_size = 1,
++    .vmlist_size = 2,
 ```
 
 Then, we need to rearrange the number of vCPUs:
