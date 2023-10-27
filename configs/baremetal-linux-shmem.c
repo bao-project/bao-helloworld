@@ -1,7 +1,7 @@
 #include <config.h>
 
-VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-linux-setup/baremetal.bin));
-VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/baremetal-freeRTOS-linux-setup/linux-shmem.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-linux-shmem-setup/baremetal.bin));
+VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/baremetal-linux-shmem-setup/linux-shmem.bin));
 
 struct config config = {
     
@@ -30,7 +30,18 @@ struct config config = {
                 .regions =  (struct vm_mem_region[]) {
                     {
                         .base = 0x50000000,
-                        .size = 0x4000000 
+                        .size = 0x8000000 
+                    }
+                },
+
+                .ipc_num = 1,
+                .ipcs = (struct ipc[]) {
+                    {
+                        .base = 0x70000000,
+                        .size = 0x00010000,
+                        .shmem_id = 0,
+                        .interrupt_num = 1,
+                        .interrupts = (irqid_t[]) {52}
                     }
                 },
 
@@ -40,7 +51,9 @@ struct config config = {
                         /* PL011 */
                         .pa = 0x9000000,
                         .va = 0x9000000,
-                        .size = 0x10000,                     
+                        .size = 0x10000,
+                        // .interrupt_num = 1,
+                        // .interrupts = (irqid_t[]) {33}                   
                     },
                     {   
                         /* Arch timer interrupt */
