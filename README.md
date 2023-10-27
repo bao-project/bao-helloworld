@@ -922,13 +922,8 @@ You'll see your IPC as follows (video
 
 ![baremetal-linux-shmem](/img/.gif/baremetal_linux_shmem.gif)
 
-From here, you can employ the IPC on Linux to dispatch messages to FreeRTOS by
-writing to ``/dev/baoipc0``:
+From here, you can employ the IPC on Linux to dispatch messages to the Baremetal
+by writing to ``/dev/baoipc0``:
 ```sh
 echo "Hello, Bao!" > /dev/baoipc0
-```
-
-Or retrieve the latest FreeRTOS message by reading from ``/dev/baoipc0``:
-```sh
-cat /dev/baoipc0
 ```
