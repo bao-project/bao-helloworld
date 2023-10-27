@@ -420,11 +420,11 @@ After updating the baremetal, you need to modify the Bao configuration file:
 
 1. Update the configuration (``configs/baremetal.c``) with the new memory size:
 ```diff
-                .regions =  (struct vm_mem_region[]) {
-                    {
-                        .base = 0x50000000,
--                    .size = 0x4000000 
-+                    .size = 0x8000000 
+                .regions =  (struct vm_mem_region[]) {      | line 24
+                    {                                       | line 25
+                        .base = 0x50000000,                 | line 26
+-                    .size = 0x4000000                      | line 27
++                    .size = 0x8000000                      | line 27
                     }
                 }
 ```
@@ -493,7 +493,6 @@ directory, called `free_rtos.bin`. Move the binary file to your build directory
 (`BUILD_GUESTS_DIR`):
 
 ```sh
-mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup
 cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin \
     $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/free-rtos.bin
 ```
@@ -502,8 +501,9 @@ cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin \
 
 Now, we have both guests compiled and ready for our dual-guest setup. However,
 there are some steps required to fit the two VMs on our platform. Let's
-understand the differences between the configuration of the first setup and the
-configuration of the second setup.
+understand the differences between the [configuration of the first
+setup](configs/baremetal.c) and the [configuration of the second
+setup](configs/baremetal-freeRTOS.c).
 
 First of all, we need to add the second VM image:
 
@@ -558,7 +558,6 @@ Therefore, we need to repeat the process of building Bao. First, copy your
 configuration file to the working directory with the following commands:
 
 ```sh
-mkdir -p $mkdir -p $BUILD_BAO_DIR/config
 cp -L $ROOT_DIR/configs/baremetal-freeRTOS.c\
     $BUILD_BAO_DIR/config/baremetal-freeRTOS.c
 ```
@@ -599,6 +598,12 @@ qemu-system-aarch64 -nographic \
   -device virtio-serial-device -chardev pty,id=serial3 \
   -device virtconsole,chardev=serial3
 ```
+
+Finally, make U-Boot jump to where the bao image was loaded:
+```sh
+go 0x50000000
+```
+
 Now, you should have an output as follows (video
 [here](https://asciinema.org/a/613622)):
 
@@ -738,7 +743,6 @@ Therefore, we need to repeat the process of building Bao. First, copy your
 configuration file to the working directory with the following commands:
 
 ```sh
-mkdir -p $mkdir -p $BUILD_BAO_DIR/config
 cp -L $ROOT_DIR/configs/baremetal-linux.c\
     $BUILD_BAO_DIR/config/baremetal-linux.c
 ```
@@ -785,9 +789,8 @@ to the specified pseudoterminal. Here's how:
 ```sh
 screen /dev/pts/4
 ```
-
-The Linux guest is also accessible via ssh at the static address 192.168.42.15.
-The password for root is root.
+:warning: Please be aware that the pts port may vary for each user. To find the
+correct pts port, kindly refer to the qemu output console.
 
 After all, you should see an output as follows (video
 [here](https://asciinema.org/a/616290)):
@@ -869,7 +872,6 @@ cp $LINUX_DIR/linux-build/$LINUX_VM.bin \
 Given that you've modified one of the guests, it's now essential to rebuild
 Bao:
 ```sh
-mkdir -p $mkdir -p $BUILD_BAO_DIR/config
 cp -L $ROOT_DIR/configs/baremetal-linux.c\
     $BUILD_BAO_DIR/config/baremetal-linux.c
 ```
