@@ -233,7 +233,7 @@ with the following commands:
 
 ```sh
 mkdir -p $mkdir -p $BUILD_BAO_DIR/config
-cp -L $ROOT_DIR/configs/baremetal.c $BUILD_BAO_DIR/config/baremetal.c
+mkdir -p $BUILD_BAO_DIR/config
 ```
 
 #### 2.2.3. Compiling Bao Hypervisor
@@ -281,7 +281,6 @@ To install QEMU, simply run the following commands:
 ```sh
 export QEMU_DIR=$ROOT_DIR/tools/qemu-aarch64
 export TOOLS_DIR=$ROOT_DIR/tools/bin
-mkdir -p $ROOT_DIR/tools/bin
 mkdir -p $TOOLS_DIR
 git clone https://github.com/qemu/qemu.git $QEMU_DIR --depth 1\
    --branch v7.2.0
@@ -320,7 +319,7 @@ export ATF_DIR=$ROOT_DIR/tools/arm-trusted-firmware
 git clone https://github.com/bao-project/arm-trusted-firmware.git\
    $ATF_DIR --branch bao/demo --depth 1
 cd $ATF_DIR
-make PLAT=qemu bl1 fip BL33=$$TOOLS_DIR/u-boot.bin\
+make PLAT=qemu bl1 fip BL33=$TOOLS_DIR/u-boot.bin\
    QEMU_USE_GIC_DRIVER=QEMU_GICV3
 dd if=$ATF_DIR/build/qemu/release/bl1.bin\
    of=$TOOLS_DIR/flash.bin
