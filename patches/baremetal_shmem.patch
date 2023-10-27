@@ -1,5 +1,5 @@
 diff --git a/src/main.c b/src/main.c
-index 2233486..66f30f9 100644
+index c24e6c4..66f30f9 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -30,6 +30,50 @@
@@ -53,12 +53,12 @@ index 2233486..66f30f9 100644
  void timer_handler(){
      printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
      timer_set(TIMER_INTERVAL);
-@@ -46,14 +90,22 @@ void main(void){
+@@ -46,13 +90,22 @@ void main(void){
          spin_unlock(&print_lock);
  
          irq_set_handler(TIMER_IRQ_ID, timer_handler);
 +        irq_set_handler(UART_IRQ_ID, uart_rx_handler);
-         
++
 +        uart_enable_rxirq();
 +
          timer_set(TIMER_INTERVAL);
