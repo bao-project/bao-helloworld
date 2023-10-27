@@ -1,7 +1,7 @@
 # "Hello world"? We prefer "Hello Bao!"
 
 Welcome to the Bao Hypervisor! Get ready for an interactive journey as we
-explore the world of Bao together. Whether you're a seasoned Bao user or a
+explore the world of Bao together. Whether you're a experience Bao user or a
 newcomer, this tour is designed to give you a practical introduction to the Bao
 hypervisor.
 
@@ -16,7 +16,6 @@ interact. For this purpose, the guide contains the following topics:
 - A **getting started** section that helps users to prepare the environment
   where we will build the target setups. We also provide extra detailed
   documentation notes regarding some implementation aspects of the hypervisor;
-
 - An **initial setup** section that explores the different components of the
   system and gets the first practical example of this guide;
 - An **interactive tutorial on changing the guests** running on top of Bao;
@@ -91,10 +90,10 @@ export CROSS_COMPILE=/path/to/toolchain/install/dir/bin/your-toolchain-prefix-
 
 Please note that having sufficient free space is important for a smooth
 experience, particularly because of the Linux image that will be built for the
-Linux guest VM. To prevent any space-related issues, we suggest having a
-minimum of 13 GiB of free space available on your system. With your environment
-set up and all the dependencies installed, you are now prepared to explore the
-Bao hypervisor and create your first virtualized environment.
+Linux guest VM. To prevent any space-related issues, we suggest having a minimum
+of **13 GiB of free space** available on your system. With your environment set
+up and all the dependencies installed, you are now prepared to explore the Bao
+hypervisor and create your first virtualized environmen
 
 | Component         | Required Space | Percentage of space Required |
 |-------------------|:--------------:|:---------------------------: |
