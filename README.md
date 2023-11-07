@@ -123,7 +123,8 @@ the following commands:
 
 ```sh
 export ROOT_DIR=$(realpath .)
-export SETUP_BUILD=$ROOT_DIR/bin
+export PRE_BUILT_IMGS=$ROOT_DIR/bin
+export SETUP_BUILD=$ROOT_DIR/build
 export PATCHES_DIR=$ROOT_DIR/patches
 export TOOLS_DIR=$ROOT_DIR/tools
 export BUILD_GUESTS_DIR=$SETUP_BUILD/guests
@@ -601,6 +602,15 @@ git clone $LINUX_REPO $LINUX_SRCS\
     --depth 1 --branch $LINUX_VERSION
 cd $LINUX_SRCS
 git apply $ROOT_DIR/srcs/patches/$LINUX_VERSION/*.patch
+```
+:information_source: If you prefer to skip these steps and use a pre-built Linux
+image, execute the following commands and proceed to the
+[next step](#532-welcome-our-new-guest).
+
+```sh
+mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-setup
+cp $PRE_BUILT_IMGS/guests/baremetal-linux-setup/linux.bin \
+    $SETUP_BUILD/baremetal-linux-setup/linux.bin
 ```
 
 ```sh
