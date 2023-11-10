@@ -186,7 +186,7 @@ compile the baremetal compilation):
 
 ```sh
 git -C $BAREMETAL_SRCS apply $PATCHES_DIR/baremetal.patch
-make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
+make -C $BAREMETAL_SRCS PLATFORM=qemu-riscv64-virt
 ```
 
 Upon completing these steps, you'll find a binary file in the
@@ -196,7 +196,7 @@ directory (``BUILD_GUESTS_DIR``):
 
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-setup
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
 ```
 
@@ -247,7 +247,7 @@ need to compile it!
 
 ```sh
 make -C $BAO_SRCS\
-    PLATFORM=qemu-aarch64-virt\
+    PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal\
     CONFIG_BUILTIN=y\
@@ -259,7 +259,7 @@ directory called `bao.bin`. Now, let's move the binary file to your build
 directory:
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
 ```
 
 ## 3. Build Firmware - Powering Up Your Setup
@@ -284,54 +284,24 @@ working with version 7.2.0 or higher. In that case, feel free to move on to the
 To install QEMU, simply run the following commands:
 
 ```sh
-export QEMU_DIR=$ROOT_DIR/tools/qemu-aarch64
-export TOOLS_DIR=$ROOT_DIR/tools/bin
-mkdir -p $TOOLS_DIR
+export QEMU_DIR=$ROOT_DIR/tools/qemu-riscv64
 git clone https://github.com/qemu/qemu.git $QEMU_DIR --depth 1\
    --branch v7.2.0
 cd $QEMU_DIR
-./configure --target-list=aarch64-softmmu --enable-slirp
+./configure --target-list=riscv64-softmmu --enable-slirp
 make -j$(nproc)
 sudo make install
 ```
 
-### 3.2 Installing U-Boot
+### 3.2 Clone OpenSBI
 
-To get U-Boot up and running, simply execute the following commands:
-
-```sh
-export UBOOT_DIR=$ROOT_DIR/tools/u-boot
-git clone https://github.com/u-boot/u-boot.git $UBOOT_DIR --depth 1\
-   --branch v2022.10
-
-cd $UBOOT_DIR
-make qemu_arm64_defconfig
-
-echo "CONFIG_TFABOOT=y" >> .config
-echo "CONFIG_SYS_TEXT_BASE=0x60000000" >> .config
-
-make -j$(nproc)
-
-cp $UBOOT_DIR/u-boot.bin $TOOLS_DIR
-```
-
-### 3.3 Let's Build the TrustedFirmware-A
-
-We're almost there! Now, let's go ahead and build TF-A:
+To get OpenSBI up and running, simply execute the following commands:
 
 ```sh
-export ATF_DIR=$ROOT_DIR/tools/arm-trusted-firmware
-git clone https://github.com/bao-project/arm-trusted-firmware.git\
-   $ATF_DIR --branch bao/demo --depth 1
-cd $ATF_DIR
-make PLAT=qemu bl1 fip BL33=$TOOLS_DIR/u-boot.bin\
-   QEMU_USE_GIC_DRIVER=QEMU_GICV3
-dd if=$ATF_DIR/build/qemu/release/bl1.bin\
-   of=$TOOLS_DIR/flash.bin
-dd if=$ATF_DIR/build/qemu/release/fip.bin\
-   of=$TOOLS_DIR/flash.bin seek=64 bs=4096 conv=notrunc
+export OPENSBI_DIR=$ROOT_DIR/tools/OpenSBI
+git clone https://github.com/bao-project/opensbi.git $OPENSBI_DIR\
+    --depth 1 --branch bao/demo
 ```
-
 
 ## 4. Let's Try It Out! - Unleash the Power
 
@@ -347,36 +317,25 @@ Once everything is in place, we'll proceed with the QEMU launch. This is the
 command to run:
 
 ```sh
-qemu-system-aarch64 -nographic\
-   -M virt,secure=on,virtualization=on,gic-version=3 \
-   -cpu cortex-a53 -smp 4 -m 4G\
-   -bios $TOOLS_DIR/flash.bin \
-   -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on\
-   -device virtio-net-device,netdev=net0 \
-   -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22\
-   -device virtio-serial-device -chardev pty,id=serial3 \
-   -device virtconsole,chardev=serial3
+make -C $TOOLS_DIR/OpenSBI PLATFORM=generic \
+    FW_PAYLOAD=y \
+    FW_PAYLOAD_FDT_ADDR=0x80100000\
+    FW_PAYLOAD_PATH=$BUILD_BAO_DIR/bao.bin
+
+cp $TOOLS_DIR/OpenSBI/build/platform/generic/firmware/fw_payload.elf \
+    $TOOLS_DIR/bin/opensbi.elf
+
+qemu-system-riscv64 -nographic\
+    -M virt -cpu rv64 -m 4G -smp 4\
+    -bios $TOOLS_DIR/bin/opensbi.elf\
+    -device virtio-net-device,netdev=net0 \
+    -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
+    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
 
-Now, you should see TF-A and U-Boot initialization log. Now, let's set up
-connections and jump into Bao. QEMU will reveal the pseudo-terminals that where
-placed in the virtio serial. Here's an example:
+Now, you should see OpenSBI initialization log. Now, let's set up
+connections and jump into Bao. Here's an example:
 
-```sh
-char device redirected to /dev/pts/4 (label serial3)
-```
-
-To make the connection, open a fresh terminal window and establish a connection
-to the specified pseudoterminal. Here's how:
-
-```sh
-screen /dev/pts/4
-```
-
-Finally, make U-Boot jump to where the bao image was loaded:
-```sh
-go 0x50000000
-```
 And you should have an output as follows (video
 [here](https://asciinema.org/a/613609)):
 
@@ -402,7 +361,7 @@ to 128 MiB. To do this, follow these steps:
 
 #### 5.1.1 Update the VM memory
 1. Open the platform configuration file located at 
-   ``baremetal/src/platform/qemu-aarch64-virt/inc/plat.h``.
+   ``baremetal/src/platform/qemu-riscv64-virt/inc/plat.h``.
 2. Modify the platform memory size from 64MiB (0x4000000) to 128 MiB
    (0x8000000):
 
@@ -415,8 +374,8 @@ to 128 MiB. To do this, follow these steps:
 3. Recompile the baremetal:
 
 ```sh
-make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+make -C $BAREMETAL_SRCS PLATFORM=qemu-riscv64-virt
+cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
 ```
 
@@ -438,28 +397,33 @@ After updating the baremetal, you need to modify the Bao configuration file:
 
 ```sh
 make -C $BAO_SRCS\
-    PLATFORM=qemu-aarch64-virt\
+    PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal\
     CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
 ```
 
 #### 5.1.4 Run the setup
 
 To run this setup just use the following command:
 ```sh
-qemu-system-aarch64 -nographic \
-  -M virt,secure=on,virtualization=on,gic-version=3 \
-  -cpu cortex-a53 -smp 4 -m 4G \
-  -bios $TOOLS_DIR/flash.bin \
-  -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on \
-  -device virtio-net-device,netdev=net0 \
-  -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22 \
-  -device virtio-serial-device -chardev pty,id=serial3 \
-  -device virtconsole,chardev=serial3
+make -C $TOOLS_DIR/OpenSBI PLATFORM=generic \
+    FW_PAYLOAD=y \
+    FW_PAYLOAD_FDT_ADDR=0x80100000\
+    FW_PAYLOAD_PATH=$BUILD_BAO_DIR/bao.bin
+
+cp $TOOLS_DIR/OpenSBI/build/platform/generic/firmware/fw_payload.elf \
+    $TOOLS_DIR/bin/opensbi.elf
+
+qemu-system-riscv64 -nographic\
+    -M virt -cpu rv64 -m 4G -smp 4\
+    -bios $TOOLS_DIR/bin/opensbi.elf\
+    -device virtio-net-device,netdev=net0 \
+    -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
+    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
 
 ### 5.2 Add a second guest - freeRTOS
