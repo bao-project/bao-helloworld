@@ -812,7 +812,7 @@ Now, let's generate the updated device tree:
 ```sh
 export LINUX_VM=linux-shmem
 dtc $ROOT_DIR/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
-    $LINUX_DIR/linux-build/$LINUX_VM.dtb
+    $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM.dtb
 ```
 
 :warning: To correctly introduce these changes, you need to ensure that you
@@ -822,27 +822,15 @@ Bundle the kernel image and device tree blob into a single binary:
 ```sh
 make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
     ARCH=riscv64\
-    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-riscv64-virt\
-    DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
-    TARGET=$LINUX_DIR/linux-build/$LINUX_VM
-```
-
-Finally, move the binary file to the (compiled) guests folder:
-```sh
-cp $LINUX_DIR/linux-build/$LINUX_VM.bin \
-    $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM.bin
+    IMAGE=$PRE_BUILT_IMGS/guests/baremetal-linux-shmem-setup/Image-qemu-riscv64-virt\
+    DTB=$BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM.dtb\
+    TARGET=$BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM
 ```
 
 ### 5.4.2. Rebuild Bao
 
 Given that you've modified one of the guests, it's now essential to rebuild
-Bao:
-```sh
-cp -L $ROOT_DIR/configs/baremetal-linux.c\
-    $BUILD_BAO_DIR/config/baremetal-linux.c
-```
-
-Subsequently, compile it:
+Bao. Thus, compile it using the following command:
 ```sh
 make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
@@ -866,16 +854,17 @@ cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal-linux/bao.bin \
 Now, you're ready to execute the final setup:
 
 ```sh
-make -C $TOOLS_DIR/opensbi PLATFORM=generic \
+make -C $TOOLS_DIR/OpenSBI PLATFORM=generic \
     FW_PAYLOAD=y \
     FW_PAYLOAD_FDT_ADDR=0x80100000\
     FW_PAYLOAD_PATH=$BUILD_BAO_DIR/bao.bin
-cp opensbi/build/platform/generic/firmware/fw_payload.elf \
-    $TOOLS_DIR/opensbi.elf
+
+cp $TOOLS_DIR/OpenSBI/build/platform/generic/firmware/fw_payload.elf \
+    $TOOLS_DIR/bin/opensbi.elf
 
 qemu-system-riscv64 -nographic\
     -M virt -cpu rv64 -m 4G -smp 4\
-    -bios $TOOLS_DIR/opensbi.elf\
+    -bios $TOOLS_DIR/bin/opensbi.elf\
     -device virtio-net-device,netdev=net0 \
     -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
     -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
