@@ -86,26 +86,23 @@ the reference toolchain prefix path:
 export CROSS_COMPILE=/path/to/toolchain/install/dir/bin/your-toolchain-prefix-
 ```
 
-### 1.4 Ensuring Enough Free Space
+### 1.4 Ensuring Enough Free Storage
 
-Please note that having sufficient free space is important for a smooth
+Please note that having sufficient free storage is important for a smooth
 experience, particularly because of the Linux image that will be built for the
-Linux guest VM. To prevent any space-related issues, we suggest having a minimum
-of **13 GiB of free space** available on your system. With your environment set
+Linux guest VM. To prevent any storage-related issues, we suggest having a minimum
+of **13 GiB of free storage** available on your system. With your environment set
 up and all the dependencies installed, you are now prepared to explore the Bao
 hypervisor and create your first virtualized environmen
 
-| Component         | Required Space | Percentage of space Required |
-|-------------------|:--------------:|:---------------------------: |
-| Bao               | 155.8 MiB      | 1.23%                        |
-| Guest (Linux)     | 10.5 GiB       | 84.74%                       |
-| Guest (freeRTOS)  | 24.8 MiB       | 0.20%                        |
-| Guest (baremetal) | 4.2 MiB        | 0.03%                        |
-| Tools (QEMU)      | 1.7 GiB        | 13.74%                       |
-| Tools (u-boot)    | 237 MiB        | 1.87%                        |
-| Tools (ATF)       | 52 MiB         | 0.41%                        |
-
----
+| Component         | Required storage | Percentage of storage Required |
+|-------------------|:----------------:|:------------------------------:|
+| Bao               | 155.8 MiB        |            1.28%               |
+| Guest (Linux)     | 10.5 GiB         |            86.78%              |
+| Guest (freeRTOS)  | 24.8 MiB         |            0.20%               |
+| Guest (baremetal) | 4.2 MiB          |            0.03%               |
+| Tools (QEMU)      | 1.3 GiB          |            10.74%              |
+| Tools (OpenSBI)   | 114 MiB          |            0.92%               |
 
 ## 2. Initial setup - Taking the First Steps!
 
@@ -113,15 +110,22 @@ Now that you're geared up, it's time to take the first steps on this tour. In
 the Initial Setup section, we'll explore the different components of the system
 and walk you through a practical example to give you a solid foundation.
 
-We'll begin by configuring a development environment and establishing a
-directory tree to hold the several components needed. Open up your terminal and
-execute the following commands:
+We'll start by setting up a working environment. Begin by cloning the ``Bao
+hello world`` repository:
+```sh
+git clone https://github.com/bao-project/bao-helloworld.git
+cd bao-helloworld
+```
+
+Next, proceed to configure the development environment and establish a directory
+tree to organize the various components required. Open your terminal and execute
+the following commands:
 
 ```sh
 export ROOT_DIR=$(realpath .)
 export SETUP_BUILD=$ROOT_DIR/bin
 export PATCHES_DIR=$ROOT_DIR/patches
-
+export TOOLS_DIR=$ROOT_DIR/tools
 export BUILD_GUESTS_DIR=$SETUP_BUILD/guests
 export BUILD_BAO_DIR=$SETUP_BUILD/bao
 export BUILD_FIRMWARE_DIR=$SETUP_BUILD/firmware
@@ -129,6 +133,7 @@ export BUILD_FIRMWARE_DIR=$SETUP_BUILD/firmware
 mkdir -p $BUILD_GUESTS_DIR
 mkdir -p $BUILD_BAO_DIR
 mkdir -p $BUILD_FIRMWARE_DIR
+mkdir -p $TOOLS_DIR/bin
 ```
 
 Upon completing these commands, your directory tree should look like this:
@@ -204,12 +209,12 @@ different configuration options, our detailed Bao config documentation is
 [here](https://github.com/bao-project/bao-docs/tree/wip/bao-\
 classic_config) to help.
 
-:warning: If you are using a directory structure of the one presented in the
-tutorial, please make sure to update the following code in the
+:warning: If you are using a different directory structure of the one presented
+in the tutorial, please make sure to update the following code in the
 [configuration file](configs/baremetal.c).
 
 ```c
-VM_IMAGE(baremetal_image, XSTR(BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-setup/baremetal.bin));
 ```
 
 Now we must build Bao. There's no need for any complex setup; it's
@@ -268,10 +273,10 @@ assist you in obtaining the necessary firmware tailored to your target platform
 
 QEMU provides a convenient alternative to a hardware platform. If you haven't
 installed it yet, don't worry. We're here to walk you through the process of
-building and installing it. In this guide, we'll target the Aarch64
+building and installing it. In this guide, we'll target the riscv64
 architecture.
 
-If you already have qemu-system-aarch64, or if you'd prefer to install it
+If you already have qemu-system-riscv64, or if you'd prefer to install it
 directly using a package manager or another method, just make sure you're
 working with version 7.2.0 or higher. In that case, feel free to move on to the
 [next step](#32-now-you-need-u-boot).
