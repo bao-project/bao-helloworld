@@ -439,7 +439,7 @@ Let's kick things off by incorporating a second VM running FreeRTOS.
 First, we can use the baremetal compiled from the first setup:
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/baremetal.bin
 ```
 
@@ -454,16 +454,16 @@ git clone --recursive --shallow-submodules\
     https://github.com/bao-project/freertos-over-bao.git\
     $FREERTOS_SRCS --branch demo
 git -C $FREERTOS_SRCS apply $PATCHES_DIR/freeRTOS.patch
-make -C $FREERTOS_SRCS PLATFORM=qemu-aarch64-virt $FREERTOS_PARAMS
+make -C $FREERTOS_SRCS PLATFORM=qemu-riscv64-virt $FREERTOS_PARAMS
 ```
 
 Upon completing these steps, you'll find a binary file in the `FREERTOS_SRCS`
-directory, called `free_rtos.bin`. Move the binary file to your build directory
+directory, called `freertos.bin`. Move the binary file to your build directory
 (`BUILD_GUESTS_DIR`):
 
 ```sh
-cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin \
-    $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/free-rtos.bin
+cp $FREERTOS_SRCS/build/qemu-riscv64-virt/freertos.bin \
+    $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/freertos.bin
 ```
 
 #### 5.2.2. Integrating the new guest
@@ -479,7 +479,7 @@ First of all, we need to add the second VM image:
 ```diff
 - VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-setup/baremetal.bin));
 + VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/baremetal.bin));
-+ VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/free-rtos.bin));
++ VM_IMAGE(freertos_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-freeRTOS-setup/freertos.bin));
 ```
 
 Also, since we now have 2 VMs, we need to change the `vm_list_size` in our
@@ -523,20 +523,13 @@ Additionally, we need to include all the configurations of the second VM.
 #### 5.2.3. Let's rebuild Bao!
 
 As we've seen, changing the guests includes changing the configuration file.
-Therefore, we need to repeat the process of building Bao. First, copy your
-configuration file to the working directory with the following commands:
-
-```sh
-cp -L $ROOT_DIR/configs/baremetal-freeRTOS.c\
-    $BUILD_BAO_DIR/config/baremetal-freeRTOS.c
-```
-
-Then, you just need to compile it. Please note that the flag `CONFIG` defines
-the configuration file to be used on the compilation of Bao!
+Therefore, we need to repeat the process of building Bao. Please note that the
+flag `CONFIG` defines the configuration file to be used on the compilation of
+Bao. To compile it, use the following command:
 
 ```sh
 make -C $BAO_SRCS\
-    PLATFORM=qemu-aarch64-virt\
+    PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-freeRTOS\
     CONFIG_BUILTIN=y\
@@ -548,7 +541,7 @@ directory, called `bao.bin`. Move the binary file to your build directory
 (`BUILD_BAO_DIR`):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS/bao.bin \
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal-freeRTOS/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
@@ -557,20 +550,20 @@ cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS/bao.bin \
 Now, you have everything configured for testing your new setup! Just run the
 following command:
 ```sh
-qemu-system-aarch64 -nographic \
-  -M virt,secure=on,virtualization=on,gic-version=3 \
-  -cpu cortex-a53 -smp 4 -m 4G \
-  -bios $TOOLS_DIR/flash.bin \
-  -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on \
-  -device virtio-net-device,netdev=net0 \
-  -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22 \
-  -device virtio-serial-device -chardev pty,id=serial3 \
-  -device virtconsole,chardev=serial3
-```
+make -C $TOOLS_DIR/OpenSBI PLATFORM=generic \
+    FW_PAYLOAD=y \
+    FW_PAYLOAD_FDT_ADDR=0x80100000\
+    FW_PAYLOAD_PATH=$BUILD_BAO_DIR/bao.bin
 
-Finally, make U-Boot jump to where the bao image was loaded:
-```sh
-go 0x50000000
+cp $TOOLS_DIR/OpenSBI/build/platform/generic/firmware/fw_payload.elf \
+    $TOOLS_DIR/bin/opensbi.elf
+
+qemu-system-riscv64 -nographic\
+    -M virt -cpu rv64 -m 4G -smp 4\
+    -bios $TOOLS_DIR/bin/opensbi.elf\
+    -device virtio-net-device,netdev=net0 \
+    -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
+    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
 
 Now, you should have an output as follows (video
