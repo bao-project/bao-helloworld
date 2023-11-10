@@ -161,7 +161,7 @@ practical aspects, let's first understand the setup we're building. Our goal is
 to deploy a baremetal guest on top of the Bao hypervisor, as shown in the
 figure below:
 
-![Init Setup](/img/single-guest.svg)
+![Init Setup](/img/baremetal-setup.svg)
 
 :information_source: For the sake of simplicity and accessibility, we'll use
 the QEMU emulator (don't worry, we'll guide you through its installation later
@@ -435,7 +435,7 @@ incorporating a second VM running FreeRTOS.
 
 Let's kick things off by incorporating a second VM running FreeRTOS.
 
-![Init Setup](/img/dual-guest-rtos.svg)
+![Init Setup](/img/baremetal-freertos-setup.svg)
 
 First, we can use the baremetal compiled from the first setup:
 ```sh
@@ -576,7 +576,7 @@ Now, you should have an output as follows (video
 
 Now, let's introduce a third VM running the Linux OS.
 
-![Init Setup](/img/triple-guest.svg)
+![Init Setup](/img/baremetal-linux-setup.svg)
 
 First, we can re-use our guests from the previous setup:
 ```sh
@@ -780,7 +780,7 @@ channel. To achieve this, we'll make use of a shared memory object and
 Inter-Process Communication (IPC) mechanisms, enabling the Linux VM to
 seamlessly interact with the system.
 
-![Init Setup](/img/triple-guest-shmem.svg)
+![Init Setup](/img/baremetal-linux-ipc-setup.svg)
 
 
 ### 5.4.1. Add Shared Memory and IPC to our guest
