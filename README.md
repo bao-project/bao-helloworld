@@ -580,7 +580,7 @@ Now, let's introduce a third VM running the Linux OS.
 First, we can re-use our guests from the previous setup:
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-setup
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-linux-setup/baremetal.bin
 ```
 
@@ -603,19 +603,25 @@ cd $LINUX_SRCS
 git apply $ROOT_DIR/srcs/patches/$LINUX_VERSION/*.patch
 ```
 
+```sh
+mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-setup
+cp $PRE_BUILT_IMGS/guests/baremetal-linux-setup/linux.bin \
+    $BUILD_GUESTS_DIR/baremetal-linux-setup/linux.bin
+```
+
 Setup an environment variable pointing to the target architecture and platform
 specific config to be used by buildroot:
 
 ```sh
 export LINUX_CFG_FRAG=$(ls $ROOT_DIR/srcs/configs/base.config\
-    $ROOT_DIR/srcs/configs/aarch64.config\
-    $ROOT_DIR/srcs/configs/qemu-aarch64-virt.config 2> /dev/null)
+    $ROOT_DIR/srcs/configs/riscv64.config\
+    $ROOT_DIR/srcs/configs/qemu-riscv64-virt.config 2> /dev/null)
 ```
 
 Setup buildroot environment variables:
 ```sh
-export BUILDROOT_SRCS=$LINUX_DIR/buildroot-aarch64-$LINUX_VERSION
-export BUILDROOT_DEFCFG=$ROOT_DIR/srcs/buildroot/aarch64.config
+export BUILDROOT_SRCS=$LINUX_DIR/buildroot-riscv64-$LINUX_VERSION
+export BUILDROOT_DEFCFG=$ROOT_DIR/srcs/buildroot/riscv64.config
 export LINUX_OVERRIDE_SRCDIR=$LINUX_SRCS
 ```
 
@@ -634,24 +640,24 @@ make defconfig BR2_DEFCONFIG=$BUILDROOT_DEFCFG
 make linux-reconfigure all
 
 mv $BUILDROOT_SRCS/output/images/Image\
-    $BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt
+    $BUILDROOT_SRCS/output/images/Image-qemu-riscv64-virt
 ```
 
 The device tree for this setup is available in ``srcs/devicetrees/``
-``qemu-aarch64-virt``. For a device tree file named ``linux.dts`` define a
+``qemu-riscv64-virt``. For a device tree file named ``linux.dts`` define a
 environment variable and build:
 
 ```sh
 export LINUX_VM=linux
-dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+dtc $ROOT_DIR/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
     $LINUX_DIR/linux-build/$LINUX_VM.dtb
 ```
 
 Wrap the kernel image and device tree blob in a single binary:
 ```sh
 make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
-    ARCH=aarch64\
-    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
+    ARCH=riscv64\
+    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-riscv64-virt\
     DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
     TARGET=$LINUX_DIR/linux-build/$LINUX_VM
 ```
@@ -701,18 +707,11 @@ setup, refer to the the [configuration file](/configs/baremetal-linux.c).
 #### 5.3.3. Let's rebuild Bao!
 
 As we've seen, changing the guests includes changing the configuration file.
-Therefore, we need to repeat the process of building Bao. First, copy your
-configuration file to the working directory with the following commands:
-
-```sh
-cp -L $ROOT_DIR/configs/baremetal-linux.c\
-    $BUILD_BAO_DIR/config/baremetal-linux.c
-```
-
-Then, you just need to compile it:
+Therefore, we need to repeat the process of building Bao using the following
+command:
 ```sh
 make -C $BAO_SRCS\
-    PLATFORM=qemu-aarch64-virt\
+    PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-linux\
     CONFIG_BUILTIN=y\
@@ -724,7 +723,7 @@ directory, called `bao.bin`. Move the binary file to your build directory
 (`BUILD_BAO_DIR`):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-linux/bao.bin \
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal-linux/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
@@ -734,22 +733,27 @@ With all the necessary components in place, it's time to launch QEMU and see the
 results of your work. Let's proceed:
 
 ```sh
-qemu-system-aarch64 -nographic \
-  -M virt,secure=on,virtualization=on,gic-version=3 \
-  -cpu cortex-a53 -smp 4 -m 4G \
-  -bios $TOOLS_DIR/flash.bin \
-  -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on \
-  -device virtio-net-device,netdev=net0 \
-  -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22 \
-  -device virtio-serial-device -chardev pty,id=serial3 \
-  -device virtconsole,chardev=serial3
+make -C $TOOLS_DIR/OpenSBI PLATFORM=generic \
+    FW_PAYLOAD=y \
+    FW_PAYLOAD_FDT_ADDR=0x80100000\
+    FW_PAYLOAD_PATH=$BUILD_BAO_DIR/bao.bin
+
+cp $TOOLS_DIR/OpenSBI/build/platform/generic/firmware/fw_payload.elf \
+    $TOOLS_DIR/bin/opensbi.elf
+
+qemu-system-riscv64 -nographic\
+    -M virt -cpu rv64 -m 4G -smp 4\
+    -bios $TOOLS_DIR/bin/opensbi.elf\
+    -device virtio-net-device,netdev=net0 \
+    -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
+    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
 
 To make the connection, open a fresh terminal window and establish a connection
 to the specified pseudoterminal. Here's how:
 
 ```sh
-screen /dev/pts/4
+pyserial-miniterm --filter=direct /dev/pts/4
 ```
 :warning: Please be aware that the pts port may vary for each user. To find the
 correct pts port, kindly refer to the qemu output console.
@@ -781,10 +785,10 @@ git -C $BAREMETAL_SRCS apply $PATCHES_DIR/baremetal_shmem.patch
 Next, rebuild the baremetal:
 
 ```sh
-make -C $BAREMETAL_SRCS PLATFORM=qemu-aarch64-virt
+make -C $BAREMETAL_SRCS PLATFORM=qemu-riscv64-virt
 
 mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup
-cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin \
+cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
     $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/baremetal.bin
 
 ```
@@ -807,7 +811,7 @@ Now, let's generate the updated device tree:
 
 ```sh
 export LINUX_VM=linux-shmem
-dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+dtc $ROOT_DIR/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
     $LINUX_DIR/linux-build/$LINUX_VM.dtb
 ```
 
@@ -817,8 +821,8 @@ applied the patch to Linux, as described [before](#521-build-linux-guest).
 Bundle the kernel image and device tree blob into a single binary:
 ```sh
 make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
-    ARCH=aarch64\
-    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
+    ARCH=riscv64\
+    IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-riscv64-virt\
     DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
     TARGET=$LINUX_DIR/linux-build/$LINUX_VM
 ```
@@ -841,7 +845,7 @@ cp -L $ROOT_DIR/configs/baremetal-linux.c\
 Subsequently, compile it:
 ```sh
 make -C $BAO_SRCS\
-    PLATFORM=qemu-aarch64-virt\
+    PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-linux-shmem\
     CONFIG_BUILTIN=y\
@@ -852,7 +856,7 @@ Upon successful completion, you'll locate a binary file named bao.bin in the
 ``BAO_SRCS`` directory. Move it to your build directory (``BUILD_BAO_DIR``):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-linux/bao.bin \
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal-linux/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
@@ -862,15 +866,19 @@ cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-linux/bao.bin \
 Now, you're ready to execute the final setup:
 
 ```sh
-qemu-system-aarch64 -nographic \
-  -M virt,secure=on,virtualization=on,gic-version=3 \
-  -cpu cortex-a53 -smp 4 -m 4G \
-  -bios $TOOLS_DIR/flash.bin \
-  -device loader,file="$BUILD_BAO_DIR/bao.bin",addr=0x50000000,force-raw=on \
-  -device virtio-net-device,netdev=net0 \
-  -netdev user,id=net0,hostfwd=tcp:127.0.0.1:5555-:22 \
-  -device virtio-serial-device -chardev pty,id=serial3 \
-  -device virtconsole,chardev=serial3
+make -C $TOOLS_DIR/opensbi PLATFORM=generic \
+    FW_PAYLOAD=y \
+    FW_PAYLOAD_FDT_ADDR=0x80100000\
+    FW_PAYLOAD_PATH=$BUILD_BAO_DIR/bao.bin
+cp opensbi/build/platform/generic/firmware/fw_payload.elf \
+    $TOOLS_DIR/opensbi.elf
+
+qemu-system-riscv64 -nographic\
+    -M virt -cpu rv64 -m 4G -smp 4\
+    -bios $TOOLS_DIR/opensbi.elf\
+    -device virtio-net-device,netdev=net0 \
+    -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
+    -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
 
 If all went according to plan, you should be able to spot the IPC on Linux by
