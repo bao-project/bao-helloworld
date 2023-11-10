@@ -1,5 +1,5 @@
 diff --git a/src/main.c b/src/main.c
-index c24e6c4..66f30f9 100644
+index 51d6fd7..64d968c 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -30,6 +30,50 @@
@@ -51,9 +51,9 @@ index c24e6c4..66f30f9 100644
 +}
 +
  void timer_handler(){
+     spin_lock(&print_lock);
      printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
-     timer_set(TIMER_INTERVAL);
-@@ -46,13 +90,22 @@ void main(void){
+@@ -48,9 +92,18 @@ void main(void){
          spin_unlock(&print_lock);
  
          irq_set_handler(TIMER_IRQ_ID, timer_handler);
@@ -61,10 +61,6 @@ index c24e6c4..66f30f9 100644
 +
 +        uart_enable_rxirq();
 +
-         timer_set(TIMER_INTERVAL);
-         irq_enable(TIMER_IRQ_ID);
-         irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
- 
 +        shmem_init();
 +
          master_done = true;
@@ -74,5 +70,5 @@ index c24e6c4..66f30f9 100644
 +    irq_set_prio(UART_IRQ_ID, IRQ_MAX_PRIO);
 +
      while(!master_done);
-     spin_lock(&print_lock);
-     printf("[baremetal] cpu %d up\n", get_cpuid());
+ 
+     timer_set(TIMER_INTERVAL);
