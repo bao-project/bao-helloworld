@@ -1,8 +1,8 @@
 diff --git a/src/main.c b/src/main.c
-index eabe347..c24e6c4 100644
+index eabe347..51d6fd7 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -30,64 +30,8 @@
+@@ -30,64 +30,10 @@
  
  spinlock_t print_lock = SPINLOCK_INITVAL;
  
@@ -64,11 +64,13 @@ index eabe347..c24e6c4 100644
 -
  void timer_handler(){
 -    printf("cpu%d: %s\n", get_cpuid(), __func__);
++    spin_lock(&print_lock);
 +    printf("[baremetal] cpu%d: %s\n", get_cpuid(), __func__);
++    spin_unlock(&print_lock);
      timer_set(TIMER_INTERVAL);
      irq_send_ipi(1ull << (get_cpuid() + 1));
  }
-@@ -101,31 +45,17 @@ void main(void){
+@@ -101,31 +47,18 @@ void main(void){
          printf("Bao bare-metal test guest\n");
          spin_unlock(&print_lock);
  
@@ -78,10 +80,10 @@ index eabe347..c24e6c4 100644
 -
 -        uart_enable_rxirq();
 -
-         timer_set(TIMER_INTERVAL);
-         irq_enable(TIMER_IRQ_ID);
-         irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
- 
+-        timer_set(TIMER_INTERVAL);
+-        irq_enable(TIMER_IRQ_ID);
+-        irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
+-
 -#ifdef DEMO_IPC
 -        shmem_init();
 -#endif
@@ -95,22 +97,14 @@ index eabe347..c24e6c4 100644
 -    irq_set_prio(IPI_IRQ_ID, IRQ_MAX_PRIO);
 -
      while(!master_done);
++
++    timer_set(TIMER_INTERVAL);
++    irq_enable(TIMER_IRQ_ID);
++    irq_set_prio(TIMER_IRQ_ID, IRQ_MAX_PRIO);
++
      spin_lock(&print_lock);
 -    printf("cpu %d up\n", get_cpuid());
 +    printf("[baremetal] cpu %d up\n", get_cpuid());
      spin_unlock(&print_lock);
  
      while(1) wfi();
-diff --git a/src/platform/qemu-aarch64-virt/inc/plat.h b/src/platform/qemu-aarch64-virt/inc/plat.h
-index 5e4fca6..5a3374d 100644
---- a/src/platform/qemu-aarch64-virt/inc/plat.h
-+++ b/src/platform/qemu-aarch64-virt/inc/plat.h
-@@ -2,7 +2,7 @@
- #define PLAT_H
- 
- #define PLAT_MEM_BASE 0x50000000
--#define PLAT_MEM_SIZE 0x30000000
-+#define PLAT_MEM_SIZE 0x4000000
- 
- #define PLAT_GICD_BASE_ADDR (0x08000000)
- #define PLAT_GICC_BASE_ADDR (0x08010000)
