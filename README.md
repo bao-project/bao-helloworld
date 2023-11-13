@@ -251,7 +251,6 @@ make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal\
-    CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
@@ -377,7 +376,6 @@ make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal_mod\
-    CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 
 cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
@@ -518,7 +516,6 @@ make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-freeRTOS\
-    CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
@@ -709,7 +706,6 @@ make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-linux\
-    CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
@@ -831,7 +827,6 @@ make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
     CONFIG=baremetal-linux-shmem\
-    CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 ```
 
