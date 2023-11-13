@@ -338,9 +338,9 @@ Now, you should see OpenSBI initialization log. Now, let's set up
 connections and jump into Bao. Here's an example:
 
 And you should have an output as follows (video
-[here](https://asciinema.org/a/613609)):
+[here](https://asciinema.org/a/620788)):
 
-![baremetal](/img/.gif/baremetal.gif)
+![baremetal](/img/.gif/baremetal_1vCPU.gif)
 
 
 To exit QEMU hold press `Ctrl-A` then `X`.
@@ -402,6 +402,15 @@ qemu-system-riscv64 -nographic\
     -netdev user,id=net0,net=192.168.42.0/24,hostfwd=tcp:127.0.0.1:5555-:22\
     -device virtio-serial-device -chardev pty,id=serial3 -device virtconsole,chardev=serial3
 ```
+
+Now, you should see OpenSBI initialization log. Now, let's set up
+connections and jump into Bao. Here's an example:
+
+And you should have an output as follows (video
+[here](https://asciinema.org/a/620789)):
+
+![baremetal](/img/.gif/baremetal_4vCPU.gif)
+
 
 ### 5.2 Add a second guest - freeRTOS
 
@@ -544,7 +553,7 @@ qemu-system-riscv64 -nographic\
 ```
 
 Now, you should have an output as follows (video
-[here](https://asciinema.org/a/613622)):
+[here](https://asciinema.org/a/620790)):
 
 ![baremetal-freeRTOS](/img/.gif/baremetal_freeRTOS.gif)
 
@@ -745,7 +754,7 @@ pyserial-miniterm --filter=direct /dev/pts/4
 correct pts port, kindly refer to the qemu output console.
 
 After all, you should see an output as follows (video
-[here](https://asciinema.org/a/616290)):
+[here](https://asciinema.org/a/620804)):
 
 ![baremetal-linux](/img/.gif/baremetal_linux.gif)
 
@@ -863,7 +872,7 @@ ls /dev
 ```
 
 You'll see your IPC as follows (video
-[here](https://asciinema.org/a/616289)):
+[here](https://asciinema.org/a/620803)):
 
 ![baremetal-linux-shmem](/img/.gif/baremetal_linux_shmem.gif)
 
