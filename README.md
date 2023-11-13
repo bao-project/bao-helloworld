@@ -357,57 +357,33 @@ making the necessary adjustments to meet your requirements.
 
 ### 5.1 Modify the baremetal VM
 
-Let's begin by modifying the baremetal VM. We'll increase its memory from 64 MiB
-to 128 MiB. To do this, follow these steps:
+Let's begin by modifying the baremetal VM. We'll increase the number of vCPUs
+assigned to the baremetal, as presented in the following figure:
 
-#### 5.1.1 Update the VM memory
-1. Open the platform configuration file located at 
-   ``baremetal/src/platform/qemu-riscv64-virt/inc/plat.h``.
-2. Modify the platform memory size from 64MiB (0x4000000) to 128 MiB
-   (0x8000000):
+![Init-mod Setup](/img/baremetal-mod-setup.svg)
 
+#### 5.1.1 Update the VM configuration
+
+Let's start by changing the number of vCPUs assigned to the VM (changes applied
+in the [new configuration file](configs/baremetal_mod.c)):
 ```diff
- #define PLAT_MEM_BASE 0x50000000
--#define PLAT_MEM_SIZE 0x4000000
-+#define PLAT_MEM_SIZE 0x8000000
+-       .cpu_num = 1,                                       | line 17
++       .cpu_num = 4,                                       | line 17
 ```
-
-3. Recompile the baremetal:
-
-```sh
-make -C $BAREMETAL_SRCS PLATFORM=qemu-riscv64-virt
-cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
-    $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
-```
-
-#### 5.1.3 Update Bao configuration
-After updating the baremetal, you need to modify the Bao configuration file:
-
-1. Update the configuration (``configs/baremetal.c``) with the new memory size:
-```diff
-                .regions =  (struct vm_mem_region[]) {      | line 24
-                    {                                       | line 25
-                        .base = 0x50000000,                 | line 26
--                    .size = 0x4000000                      | line 27
-+                    .size = 0x8000000                      | line 27
-                    }
-                }
-```
-
-2. Recompile Bao:
+Then, recompile Bao:
 
 ```sh
 make -C $BAO_SRCS\
     PLATFORM=qemu-riscv64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
-    CONFIG=baremetal\
+    CONFIG=baremetal_mod\
     CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 
 cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
 ```
 
-#### 5.1.4 Run the setup
+#### 5.1.2 Run the setup
 
 To run this setup just use the following command:
 ```sh
