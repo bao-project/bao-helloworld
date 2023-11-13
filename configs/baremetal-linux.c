@@ -10,11 +10,7 @@ struct config config = {
     .vmlist_size = 2,
     .vmlist = {
         {
-            .image = {
-                .base_addr = 0x80200000,
-                .load_addr = VM_IMAGE_OFFSET(baremetal_image),
-                .size = VM_IMAGE_SIZE(baremetal_image)
-            },
+            .image = VM_IMAGE_BUILTIN(baremetal_image, 0x80200000),
 
             .entry = 0x80200000,
 
@@ -32,7 +28,7 @@ struct config config = {
                 .dev_num = 1,
                 .devs =  (struct vm_dev_region[]) {
                     {
-                        /* PL011 */
+                        /* 8250 */
                         .pa = 0x10000000,
                         .va = 0x10000000,
                         .size = 0x10000,
@@ -47,11 +43,7 @@ struct config config = {
             },
         },
         { 
-            .image = {
-                .base_addr = 0x90200000,
-                .load_addr = VM_IMAGE_OFFSET(linux_image),
-                .size = VM_IMAGE_SIZE(linux_image)
-            },
+            .image = VM_IMAGE_BUILTIN(linux_image, 0x90200000),
 
             .entry = 0x90200000,
 
