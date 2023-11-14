@@ -361,7 +361,7 @@ assigned to the baremetal, as presented in the following figure:
 
 ![Init-mod Setup](/img/baremetal-mod-setup.svg)
 
-#### 5.1.1 Update the VM configuration
+#### 5.1.1 Update the number of vCPUS assigned to the VM
 
 Let's start by changing the number of vCPUs assigned to the VM (changes applied
 in the [new configuration file](configs/baremetal_mod.c)):
@@ -369,7 +369,41 @@ in the [new configuration file](configs/baremetal_mod.c)):
 -       .cpu_num = 1,                                       | line 17
 +       .cpu_num = 4,                                       | line 17
 ```
-Then, recompile Bao:
+#### 5.1.2 Update the memory assigned to the VM
+1. Open the platform configuration file located at 
+   ``baremetal/src/platform/qemu-riscv64-virt/inc/plat.h``.
+2. Modify the platform memory size from 64MiB (0x4000000) to 128 MiB
+   (0x8000000):
+
+```diff
+ #define PLAT_MEM_BASE 0x80200000
+-#define PLAT_MEM_SIZE 0x4000000
++#define PLAT_MEM_SIZE 0x8000000
+```
+
+After updating the baremetal, you need to modify the Bao configuration file.
+Update the configuration (``configs/baremetal.c``) with the new memory size:
+```diff
+            .regions =  (struct vm_mem_region[]) {      | line 20
+                {                                       | line 21
+                    .base = 0x50000000,                 | line 22
+-                   .size = 0x4000000                   | line 23
++                   .size = 0x8000000                   | line 23
+                }
+            }
+```
+
+#### 5.1.3 Recompile the baremetal
+
+Run the following commands to rebuild the baremetal image:
+
+```sh
+make -C $BAREMETAL_SRCS PLATFORM=qemu-riscv64-virt
+cp $BAREMETAL_SRCS/build/qemu-riscv64-virt/baremetal.bin \
+    $BUILD_GUESTS_DIR/baremetal-setup/baremetal.bin
+```
+
+#### 5.1.4 Recompile Bao
 
 ```sh
 make -C $BAO_SRCS\
@@ -381,7 +415,7 @@ make -C $BAO_SRCS\
 cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
 ```
 
-#### 5.1.2 Run the setup
+#### 5.1.5 Run the setup
 
 To run this setup just use the following command:
 ```sh
