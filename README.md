@@ -207,8 +207,8 @@ step involves configuring the hypervisor using Bao's configuration file. For
 this specific setup, we're providing you the [configuration
 file](configs/baremetal.c) to ease the process. If you're curious to explore
 different configuration options, our detailed Bao config documentation is
-[here](https://github.com/bao-project/bao-docs/tree/wip/bao-\
-classic_config) to help.
+[here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config)
+to help.
 
 :warning: If you are using a different directory structure of the one presented
 in the tutorial, please make sure to update the following code in the
@@ -232,17 +232,7 @@ git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
     --branch demo
 ```
 
-#### 2.2.2. Copying Your Configuration
-
-Now, let's ensure that the configuration is copied to the working directory
-with the following commands:
-
-```sh
-mkdir -p $mkdir -p $BUILD_BAO_DIR/config
-mkdir -p $BUILD_BAO_DIR/config
-```
-
-#### 2.2.3. Compiling Bao Hypervisor
+#### 2.2.2. Compiling Bao Hypervisor
 We are all set! It's time to bring the Bao Hypervisor to life. Now, we just
 need to compile it!
 
@@ -279,7 +269,7 @@ architecture.
 If you already have qemu-system-riscv64, or if you'd prefer to install it
 directly using a package manager or another method, just make sure you're
 working with version 7.2.0 or higher. In that case, feel free to move on to the
-[next step](#32-now-you-need-u-boot).
+[next step](#32-clone-opensbi).
 
 To install QEMU, simply run the following commands:
 
@@ -386,7 +376,7 @@ Update the configuration (``configs/baremetal.c``) with the new memory size:
 ```diff
             .regions =  (struct vm_mem_region[]) {      | line 20
                 {                                       | line 21
-                    .base = 0x50000000,                 | line 22
+                    .base = 0x80200000,                 | line 22
 -                   .size = 0x4000000                   | line 23
 +                   .size = 0x8000000                   | line 23
                 }
@@ -412,7 +402,7 @@ make -C $BAO_SRCS\
     CONFIG=baremetal_mod\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
 
-cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal/bao.bin $BUILD_BAO_DIR/bao.bin
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal_mod/bao.bin $BUILD_BAO_DIR/bao.bin
 ```
 
 #### 5.1.5 Run the setup
