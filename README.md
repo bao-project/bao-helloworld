@@ -852,7 +852,7 @@ Upon successful completion, you'll locate a binary file named bao.bin in the
 ``BAO_SRCS`` directory. Move it to your build directory (``BUILD_BAO_DIR``):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal-linux/bao.bin \
+cp $BAO_SRCS/bin/qemu-riscv64-virt/baremetal-linux-shmem/bao.bin \
     $BUILD_BAO_DIR/bao.bin
 ```
 
