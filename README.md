@@ -616,12 +616,6 @@ image, execute the following commands and proceed to the
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-setup
 cp $PRE_BUILT_IMGS/guests/baremetal-linux-setup/linux.bin \
-    $SETUP_BUILD/baremetal-linux-setup/linux.bin
-```
-
-```sh
-mkdir -p $BUILD_GUESTS_DIR/baremetal-linux-setup
-cp $PRE_BUILT_IMGS/guests/baremetal-linux-setup/linux.bin \
     $BUILD_GUESTS_DIR/baremetal-linux-setup/linux.bin
 ```
 
