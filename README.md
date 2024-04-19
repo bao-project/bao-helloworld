@@ -140,7 +140,7 @@ mkdir -p $TOOLS_DIR/bin
 Upon completing these commands, your directory tree should look like this:
 
 ``` sh
-├── bin
+├── build
 │   ├── bao
 │   ├── firmware
 │   └── guests
