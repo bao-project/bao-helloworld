@@ -182,7 +182,7 @@ practical aspects, let's first understand the setup we're building. Our goal is
 to deploy a baremetal guest on top of the Bao hypervisor, as shown in the
 figure below:
 
-![Init Setup](/img/baremetal-setup.svg)
+![Init Setup](./arch/aarch6464/img/baremetal-setup.svg)
 
 :information_source: For the sake of simplicity and accessibility, we'll use
 the QEMU emulator (don't worry, we'll guide you through its installation later
@@ -251,15 +251,16 @@ compile the baremetal compilation):
 ### 2.2. Build Bao Hypervisor - Laying the Foundation
 Next up, we'll guide you through building the Bao Hypervisor itself. The first
 step involves configuring the hypervisor using Bao's configuration file. For
-this specific setup, we're providing you the [configuration
-file](configs/baremetal.c) to ease the process. If you're curious to explore
+this specific setup, we're providing you the configuration
+file to ease the process. If you're curious to explore
 different configuration options, our detailed Bao config documentation is
 [here](https://github.com/bao-project/bao-docs/tree/wip/bao-classic_config)
 to help.
 
 :warning: If you are using a different directory structure of the one presented
-in the tutorial, please make sure to update the following code in the
-[configuration file](configs/baremetal.c).
+in the tutorial, please make sure to update the following code in the (either for 
+[aarch64](./arch/aarch64/configs/baremetal.c) or 
+[riscv64](./arch/riscv64/configs/baremetal.c)).
 
 ```c
 VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-setup/baremetal.bin));
@@ -289,7 +290,7 @@ need to compile it!
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-riscv64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/riscv64/configs\
       CONFIG=baremetal\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
   ```
@@ -308,7 +309,7 @@ need to compile it!
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-aarch64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/aarch64/configs\
       CONFIG=baremetal\
       CONFIG_BUILTIN=y\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
@@ -466,7 +467,7 @@ command to run:
   And you should have an output as follows (video
   [here](https://asciinema.org/a/620788)):
   
-  ![baremetal](/img/.gif/baremetal_1vCPU.gif)
+  ![baremetal](arch/riscv64/img/.gif/baremetal_1vCPU.gif)
 </details>
 
 <details>
@@ -506,7 +507,7 @@ command to run:
   And you should have an output as follows (video
   [here](https://asciinema.org/a/613609)):
   
-  ![baremetal](/img/.gif/baremetal.gif)
+  ![baremetal](arch/aarch64/img/.gif/baremetal.gif)
 
 
 </details>
@@ -535,12 +536,12 @@ making the necessary adjustments to meet your requirements.
   Let's begin by modifying the baremetal VM. We'll increase the number of vCPUs
   assigned to the baremetal, as presented in the following figure:
   
-  ![Init-mod Setup](/img/baremetal-mod-setup.svg)
+  ![Init-mod Setup](./arch/riscv64/img/baremetal-mod-setup.svg)
 
   #### 5.1.1 Update the number of vCPUS assigned to the VM
   
   Let's start by changing the number of vCPUs assigned to the VM (changes applied
-  in the [new configuration file](configs/baremetal_mod.c)):
+  in the [new configuration file](./arch/riscv64/configs/baremetal_mod.c)):
   ```diff
   -       .cpu_num = 1,                                       | line 17
   +       .cpu_num = 4,                                       | line 17
@@ -585,7 +586,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-riscv64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/riscv64/configs\
       CONFIG=baremetal_mod\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
   
@@ -617,7 +618,7 @@ making the necessary adjustments to meet your requirements.
   And you should have an output as follows (video
   [here](https://asciinema.org/a/620789)):
   
-  ![baremetal](/img/.gif/baremetal_4vCPU.gif)
+  ![baremetal](./arch/riscv64/img/.gif/baremetal_4vCPU.gif)
   
   
   ### 5.2 Add a second guest - freeRTOS
@@ -665,8 +666,8 @@ making the necessary adjustments to meet your requirements.
   Now, we have both guests compiled and ready for our dual-guest setup. However,
   there are some steps required to fit the two VMs on our platform. Let's
   understand the differences between the [configuration of the first
-  setup](configs/baremetal.c) and the [configuration of the second
-  setup](configs/baremetal-freeRTOS.c).
+  setup](arch/riscv64/configs/baremetal.c) and the [configuration of the second
+  setup](arch/riscv64/configs/baremetal-freeRTOS.c).
   
   First of all, we need to add the second VM image:
   
@@ -700,7 +701,7 @@ making the necessary adjustments to meet your requirements.
   
   Additionally, we need to include all the configurations of the second VM.
   (Details are omitted for simplicity but you can check further details in the
-  [configuration file](configs/baremetal-freeRTOS.c)):
+  [configuration file](./arch/riscv64/configs/baremetal-freeRTOS.c)):
   
   ```diff
   +        {
@@ -724,7 +725,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-riscv64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/riscv64/configs\
       CONFIG=baremetal-freeRTOS\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
   ```
@@ -762,13 +763,13 @@ making the necessary adjustments to meet your requirements.
   Now, you should have an output as follows (video
   [here](https://asciinema.org/a/620790)):
   
-  ![baremetal-freeRTOS](/img/.gif/baremetal_freeRTOS.gif)
+  ![baremetal-freeRTOS](./arch/riscv64/img/.gif/baremetal_freeRTOS.gif)
   
   ### 5.3 Adding Linux to the Mix
   
   Now, let's introduce a third VM running the Linux OS.
   
-  ![Init Setup](/img/baremetal-linux-setup.svg)
+  ![Init Setup](./arch/riscv64/img/baremetal-linux-setup.svg)
   
   First, we can re-use our guests from the previous setup:
   ```sh
@@ -793,7 +794,7 @@ making the necessary adjustments to meet your requirements.
   git clone $LINUX_REPO $LINUX_SRCS\
       --depth 1 --branch $LINUX_VERSION
   cd $LINUX_SRCS
-  git apply $ROOT_DIR/srcs/patches/$LINUX_VERSION/*.patch
+  git apply $ROOT_DIR/arch/riscv64/srcs/patches/$LINUX_VERSION/*.patch
   ```
   :information_source: If you prefer to skip these steps and use a pre-built Linux
   image, execute the following commands and proceed to the
@@ -809,15 +810,15 @@ making the necessary adjustments to meet your requirements.
   specific config to be used by buildroot:
   
   ```sh
-  export LINUX_CFG_FRAG=$(ls $ROOT_DIR/srcs/configs/base.config\
-      $ROOT_DIR/srcs/configs/riscv64.config\
-      $ROOT_DIR/srcs/configs/qemu-riscv64-virt.config 2> /dev/null)
+  export LINUX_CFG_FRAG=$(ls $ROOT_DIR/arch/riscv64/srcs/configs/base.config\
+      $ROOT_DIR/arch/riscv64/srcs/configs/riscv64.config\
+      $ROOT_DIR/arch/riscv64/srcs/configs/qemu-riscv64-virt.config 2> /dev/null)
   ```
   
   Setup buildroot environment variables:
   ```sh
   export BUILDROOT_SRCS=$LINUX_DIR/buildroot-riscv64-$LINUX_VERSION
-  export BUILDROOT_DEFCFG=$ROOT_DIR/srcs/buildroot/riscv64.config
+  export BUILDROOT_DEFCFG=$ROOT_DIR/arch/riscv64/srcs/buildroot/riscv64.config
   export LINUX_OVERRIDE_SRCDIR=$LINUX_SRCS
   ```
   
@@ -845,13 +846,13 @@ making the necessary adjustments to meet your requirements.
   
   ```sh
   export LINUX_VM=linux
-  dtc $ROOT_DIR/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
+  dtc $ROOT_DIR/arch/riscv64/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
       $LINUX_DIR/linux-build/$LINUX_VM.dtb
   ```
   
   Wrap the kernel image and device tree blob in a single binary:
   ```sh
-  make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
+  make -j $(nproc) -C $ROOT_DIR/arch/riscv64/srcs/lloader\
       ARCH=riscv64\
       IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-riscv64-virt\
       DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
@@ -898,7 +899,7 @@ making the necessary adjustments to meet your requirements.
   
   Additionally, you have the option to configure the Linux VM to integrate
   various devices and even memory regions. For specific details regarding this
-  setup, refer to the the [configuration file](/configs/baremetal-linux.c).
+  setup, refer to the the [configuration file](./arch/riscv64/configs/baremetal-linux.c).
   
   #### 5.3.3. Let's rebuild Bao!
   
@@ -908,7 +909,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-riscv64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/riscv64/configs\
       CONFIG=baremetal-linux\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
   ```
@@ -956,7 +957,7 @@ making the necessary adjustments to meet your requirements.
   After all, you should see an output as follows (video
   [here](https://asciinema.org/a/620804)):
   
-  ![baremetal-linux](/img/.gif/baremetal_linux.gif)
+  ![baremetal-linux](./arch/riscv64/img/.gif/baremetal_linux.gif)
   
   ## 5.4 Facilitating Guest Interaction
   
@@ -965,7 +966,7 @@ making the necessary adjustments to meet your requirements.
   Inter-Process Communication (IPC) mechanisms, enabling the Linux VM to
   seamlessly interact with the system.
   
-  ![Init Setup](/img/baremetal-linux-ipc-setup.svg)
+  ![Init Setup](./arch/riscv64/img/baremetal-linux-ipc-setup.svg)
   
   
   ### 5.4.1. Add Shared Memory and IPC to our guest
@@ -988,7 +989,7 @@ making the necessary adjustments to meet your requirements.
   
   ```
   Now, let's integrate an IPC into Linux. For simplicity, the
-  [linux-shmem.dts](/configs/baremetal-linux-shmem.c) file already includes the
+  [linux-shmem.dts](./arch/riscv64/configs/baremetal-linux-shmem.c) file already includes the
   following changes.
   
   ```diff
@@ -1006,16 +1007,16 @@ making the necessary adjustments to meet your requirements.
   
   ```sh
   export LINUX_VM=linux-shmem
-  dtc $ROOT_DIR/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
+  dtc $ROOT_DIR/arch/riscv64/srcs/devicetrees/qemu-riscv64-virt/$LINUX_VM.dts >\
       $BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM.dtb
   ```
   
   :warning: To correctly introduce these changes, you need to ensure that you
-  applied the patch to Linux, as described [before](#521-build-linux-guest).
+  applied the patch to Linux, as described [before](#531-build-linux-guest).
   
   Bundle the kernel image and device tree blob into a single binary:
   ```sh
-  make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
+  make -j $(nproc) -C $ROOT_DIR/arch/riscv64/srcs/lloader\
       ARCH=riscv64\
       IMAGE=$PRE_BUILT_IMGS/guests/baremetal-linux-shmem-setup/Image-qemu-riscv64-virt\
       DTB=$BUILD_GUESTS_DIR/baremetal-linux-shmem-setup/$LINUX_VM.dtb\
@@ -1029,7 +1030,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-riscv64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/riscv64/configs\
       CONFIG=baremetal-linux-shmem\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
   ```
@@ -1073,7 +1074,7 @@ making the necessary adjustments to meet your requirements.
   You'll see your IPC as follows (video
   [here](https://asciinema.org/a/620803)):
   
-  ![baremetal-linux-shmem](/img/.gif/baremetal_linux_shmem.gif)
+  ![baremetal-linux-shmem](./arch/riscv64/img/.gif/baremetal_linux_shmem.gif)
   
   From here, you can employ the IPC on Linux to dispatch messages to the Baremetal
   by writing to ``/dev/baoipc0``:
@@ -1129,7 +1130,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-aarch64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/aarch64/configs\
       CONFIG=baremetal\
       CONFIG_BUILTIN=y\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
@@ -1160,7 +1161,7 @@ making the necessary adjustments to meet your requirements.
   
   Let's kick things off by incorporating a second VM running FreeRTOS.
   
-  ![Init Setup](/img/dual-guest-rtos.svg)
+  ![Init Setup](./arch/aarch6464/img/dual-guest-rtos.svg)
   
   First, we can use the baremetal compiled from the first setup:
   ```sh
@@ -1197,8 +1198,8 @@ making the necessary adjustments to meet your requirements.
   Now, we have both guests compiled and ready for our dual-guest setup. However,
   there are some steps required to fit the two VMs on our platform. Let's
   understand the differences between the [configuration of the first
-  setup](configs/baremetal.c) and the [configuration of the second
-  setup](configs/baremetal-freeRTOS.c).
+  setup](./arch/aarch64/configs/baremetal.c) and the [configuration of the second
+  setup](./arch/aarch64/configs/baremetal-freeRTOS.c).
   
   First of all, we need to add the second VM image:
   
@@ -1232,7 +1233,7 @@ making the necessary adjustments to meet your requirements.
   
   Additionally, we need to include all the configurations of the second VM.
   (Details are omitted for simplicity but you can check further details in the
-  [configuration file](configs/baremetal-freeRTOS.c)):
+  [configuration file](./arch/aarch64configs/baremetal-freeRTOS.c)):
   
   ```diff
   +        {
@@ -1253,8 +1254,8 @@ making the necessary adjustments to meet your requirements.
   configuration file to the working directory with the following commands:
   
   ```sh
-  cp -L $ROOT_DIR/configs/baremetal-freeRTOS.c\
-      $BUILD_BAO_DIR/config/baremetal-freeRTOS.c
+  cp -L $ROOT_DIR/arch/aarch64/configs/baremetal-freeRTOS.c\
+      $BUILD_BAO_DIR/arch/aarch64/config/baremetal-freeRTOS.c
   ```
   
   Then, you just need to compile it. Please note that the flag `CONFIG` defines
@@ -1263,7 +1264,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-aarch64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/aarch64\
       CONFIG=baremetal-freeRTOS\
       CONFIG_BUILTIN=y\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
@@ -1302,13 +1303,13 @@ making the necessary adjustments to meet your requirements.
   Now, you should have an output as follows (video
   [here](https://asciinema.org/a/613622)):
   
-  ![baremetal-freeRTOS](/img/.gif/baremetal_freeRTOS.gif)
+  ![baremetal-freeRTOS](./arch/aarch6464/img/.gif/baremetal_freeRTOS.gif)
   
   ### 5.3 Adding Linux to the Mix
   
   Now, let's introduce a third VM running the Linux OS.
   
-  ![Init Setup](/img/triple-guest.svg)
+  ![Init Setup](./arch/aarch6464/img/triple-guest.svg)
   
   First, we can re-use our guests from the previous setup:
   ```sh
@@ -1333,22 +1334,22 @@ making the necessary adjustments to meet your requirements.
   git clone $LINUX_REPO $LINUX_SRCS\
       --depth 1 --branch $LINUX_VERSION
   cd $LINUX_SRCS
-  git apply $ROOT_DIR/srcs/patches/$LINUX_VERSION/*.patch
+  git apply $ROOT_DIR/arch/aarch6464/srcs/patches/$LINUX_VERSION/*.patch
   ```
   
   Setup an environment variable pointing to the target architecture and platform
   specific config to be used by buildroot:
   
   ```sh
-  export LINUX_CFG_FRAG=$(ls $ROOT_DIR/srcs/configs/base.config\
-      $ROOT_DIR/srcs/configs/aarch64.config\
-      $ROOT_DIR/srcs/configs/qemu-aarch64-virt.config 2> /dev/null)
+  export LINUX_CFG_FRAG=$(ls $ROOT_DIR/arch/aarch6464/srcs/configs/base.config\
+      $ROOT_DIR/arch/aarch6464/srcs/configs/aarch64.config\
+      $ROOT_DIR/arch/aarch6464/srcs/configs/qemu-aarch64-virt.config 2> /dev/null)
   ```
   
   Setup buildroot environment variables:
   ```sh
   export BUILDROOT_SRCS=$LINUX_DIR/buildroot-aarch64-$LINUX_VERSION
-  export BUILDROOT_DEFCFG=$ROOT_DIR/srcs/buildroot/aarch64.config
+  export BUILDROOT_DEFCFG=$ROOT_DIR/arch/aarch6464/srcs/buildroot/aarch64.config
   export LINUX_OVERRIDE_SRCDIR=$LINUX_SRCS
   ```
   
@@ -1376,13 +1377,13 @@ making the necessary adjustments to meet your requirements.
   
   ```sh
   export LINUX_VM=linux
-  dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+  dtc $ROOT_DIR/arch/aarch6464/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
       $LINUX_DIR/linux-build/$LINUX_VM.dtb
   ```
   
   Wrap the kernel image and device tree blob in a single binary:
   ```sh
-  make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
+  make -j $(nproc) -C $ROOT_DIR/arch/aarch6464/srcs/lloader\
       ARCH=aarch64\
       IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
       DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
@@ -1429,7 +1430,7 @@ making the necessary adjustments to meet your requirements.
   
   Additionally, you have the option to configure the Linux VM to integrate
   various devices and even memory regions. For specific details regarding this
-  setup, refer to the the [configuration file](/configs/baremetal-linux.c).
+  setup, refer to the the [configuration file](./arch/aarch64/configs/baremetal-linux.c).
   
   #### 5.3.3. Let's rebuild Bao!
   
@@ -1438,7 +1439,7 @@ making the necessary adjustments to meet your requirements.
   configuration file to the working directory with the following commands:
   
   ```sh
-  cp -L $ROOT_DIR/configs/baremetal-linux.c\
+  cp -L $ROOT_DIR/arch/aarch64/configs/baremetal-linux.c\
       $BUILD_BAO_DIR/config/baremetal-linux.c
   ```
   
@@ -1446,7 +1447,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-aarch64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/aarch64/configs\
       CONFIG=baremetal-linux\
       CONFIG_BUILTIN=y\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
@@ -1490,7 +1491,7 @@ making the necessary adjustments to meet your requirements.
   After all, you should see an output as follows (video
   [here](https://asciinema.org/a/616290)):
   
-  ![baremetal-linux](/img/.gif/baremetal_linux.gif)
+  ![baremetal-linux](./arch/aarch6464/img/.gif/baremetal_linux.gif)
   
   ## 5.4 Facilitating Guest Interaction
   
@@ -1499,7 +1500,7 @@ making the necessary adjustments to meet your requirements.
   Inter-Process Communication (IPC) mechanisms, enabling the Linux VM to
   seamlessly interact with the system.
   
-  ![Init Setup](/img/triple-guest-shmem.svg)
+  ![Init Setup](./arch/aarch6464/img/triple-guest-shmem.svg)
   
   
   ### 5.4.1. Add Shared Memory and IPC to our guest
@@ -1522,7 +1523,7 @@ making the necessary adjustments to meet your requirements.
   
   ```
   Now, let's integrate an IPC into Linux. For simplicity, the
-  [linux-shmem.dts](/configs/baremetal-linux-shmem.c) file already includes the
+  [linux-shmem.dts](./arch/aarch64/configs/baremetal-linux-shmem.c) file already includes the
   following changes.
   
   ```diff
@@ -1540,16 +1541,16 @@ making the necessary adjustments to meet your requirements.
   
   ```sh
   export LINUX_VM=linux-shmem
-  dtc $ROOT_DIR/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+  dtc $ROOT_DIR/arch/aarch6464/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
       $LINUX_DIR/linux-build/$LINUX_VM.dtb
   ```
   
   :warning: To correctly introduce these changes, you need to ensure that you
-  applied the patch to Linux, as described [before](#521-build-linux-guest).
+  applied the patch to Linux, as described [before](#531-build-linux-guest).
   
   Bundle the kernel image and device tree blob into a single binary:
   ```sh
-  make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
+  make -j $(nproc) -C $ROOT_DIR/arch/aarch6464/srcs/lloader\
       ARCH=aarch64\
       IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
       DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
@@ -1567,7 +1568,7 @@ making the necessary adjustments to meet your requirements.
   Given that you've modified one of the guests, it's now essential to rebuild
   Bao:
   ```sh
-  cp -L $ROOT_DIR/configs/baremetal-linux.c\
+  cp -L $ROOT_DIR/arch/aarch64/configs/baremetal-linux.c\
       $BUILD_BAO_DIR/config/baremetal-linux.c
   ```
   
@@ -1575,7 +1576,7 @@ making the necessary adjustments to meet your requirements.
   ```sh
   make -C $BAO_SRCS\
       PLATFORM=qemu-aarch64-virt\
-      CONFIG_REPO=$ROOT_DIR/configs\
+      CONFIG_REPO=$ROOT_DIR/arch/aarch64/configs\
       CONFIG=baremetal-linux-shmem\
       CONFIG_BUILTIN=y\
       CPPFLAGS=-DBAO_WRKDIR_IMGS=$BUILD_GUESTS_DIR
@@ -1615,7 +1616,7 @@ making the necessary adjustments to meet your requirements.
   You'll see your IPC as follows (video
   [here](https://asciinema.org/a/616289)):
   
-  ![baremetal-linux-shmem](/img/.gif/baremetal_linux_shmem.gif)
+  ![baremetal-linux-shmem](./arch/aarch64/img/.gif/baremetal_linux_shmem.gif)
   
   From here, you can employ the IPC on Linux to dispatch messages to the Baremetal
   by writing to ``/dev/baoipc0``:
