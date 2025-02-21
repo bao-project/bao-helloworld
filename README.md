@@ -182,7 +182,7 @@ practical aspects, let's first understand the setup we're building. Our goal is
 to deploy a baremetal guest on top of the Bao hypervisor, as shown in the
 figure below:
 
-![Init Setup](./arch/aarch6464/img/baremetal-setup.svg)
+![Init Setup](./arch/aarch64/img/baremetal-setup.svg)
 
 :information_source: For the sake of simplicity and accessibility, we'll use
 the QEMU emulator (don't worry, we'll guide you through its installation later
@@ -1161,7 +1161,7 @@ making the necessary adjustments to meet your requirements.
   
   Let's kick things off by incorporating a second VM running FreeRTOS.
   
-  ![Init Setup](./arch/aarch6464/img/dual-guest-rtos.svg)
+  ![Init Setup](./arch/aarch64/img/dual-guest-rtos.svg)
   
   First, we can use the baremetal compiled from the first setup:
   ```sh
@@ -1233,7 +1233,7 @@ making the necessary adjustments to meet your requirements.
   
   Additionally, we need to include all the configurations of the second VM.
   (Details are omitted for simplicity but you can check further details in the
-  [configuration file](./arch/aarch64configs/baremetal-freeRTOS.c)):
+  [configuration file](./arch/aarch64/configs/baremetal-freeRTOS.c)):
   
   ```diff
   +        {
@@ -1303,13 +1303,13 @@ making the necessary adjustments to meet your requirements.
   Now, you should have an output as follows (video
   [here](https://asciinema.org/a/613622)):
   
-  ![baremetal-freeRTOS](./arch/aarch6464/img/.gif/baremetal_freeRTOS.gif)
+  ![baremetal-freeRTOS](./arch/aarch64/img/.gif/baremetal_freeRTOS.gif)
   
   ### 5.3 Adding Linux to the Mix
   
   Now, let's introduce a third VM running the Linux OS.
   
-  ![Init Setup](./arch/aarch6464/img/triple-guest.svg)
+  ![Init Setup](./arch/aarch64/img/triple-guest.svg)
   
   First, we can re-use our guests from the previous setup:
   ```sh
@@ -1334,22 +1334,22 @@ making the necessary adjustments to meet your requirements.
   git clone $LINUX_REPO $LINUX_SRCS\
       --depth 1 --branch $LINUX_VERSION
   cd $LINUX_SRCS
-  git apply $ROOT_DIR/arch/aarch6464/srcs/patches/$LINUX_VERSION/*.patch
+  git apply $ROOT_DIR/arch/aarch64/srcs/patches/$LINUX_VERSION/*.patch
   ```
   
   Setup an environment variable pointing to the target architecture and platform
   specific config to be used by buildroot:
   
   ```sh
-  export LINUX_CFG_FRAG=$(ls $ROOT_DIR/arch/aarch6464/srcs/configs/base.config\
-      $ROOT_DIR/arch/aarch6464/srcs/configs/aarch64.config\
-      $ROOT_DIR/arch/aarch6464/srcs/configs/qemu-aarch64-virt.config 2> /dev/null)
+  export LINUX_CFG_FRAG=$(ls $ROOT_DIR/arch/aarch64/srcs/configs/base.config\
+      $ROOT_DIR/arch/aarch64/srcs/configs/aarch64.config\
+      $ROOT_DIR/arch/aarch64/srcs/configs/qemu-aarch64-virt.config 2> /dev/null)
   ```
   
   Setup buildroot environment variables:
   ```sh
   export BUILDROOT_SRCS=$LINUX_DIR/buildroot-aarch64-$LINUX_VERSION
-  export BUILDROOT_DEFCFG=$ROOT_DIR/arch/aarch6464/srcs/buildroot/aarch64.config
+  export BUILDROOT_DEFCFG=$ROOT_DIR/arch/aarch64/srcs/buildroot/aarch64.config
   export LINUX_OVERRIDE_SRCDIR=$LINUX_SRCS
   ```
   
@@ -1377,13 +1377,13 @@ making the necessary adjustments to meet your requirements.
   
   ```sh
   export LINUX_VM=linux
-  dtc $ROOT_DIR/arch/aarch6464/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+  dtc $ROOT_DIR/arch/aarch64/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
       $LINUX_DIR/linux-build/$LINUX_VM.dtb
   ```
   
   Wrap the kernel image and device tree blob in a single binary:
   ```sh
-  make -j $(nproc) -C $ROOT_DIR/arch/aarch6464/srcs/lloader\
+  make -j $(nproc) -C $ROOT_DIR/arch/aarch64/srcs/lloader\
       ARCH=aarch64\
       IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
       DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
@@ -1491,7 +1491,7 @@ making the necessary adjustments to meet your requirements.
   After all, you should see an output as follows (video
   [here](https://asciinema.org/a/616290)):
   
-  ![baremetal-linux](./arch/aarch6464/img/.gif/baremetal_linux.gif)
+  ![baremetal-linux](./arch/aarch64/img/.gif/baremetal_linux.gif)
   
   ## 5.4 Facilitating Guest Interaction
   
@@ -1500,7 +1500,7 @@ making the necessary adjustments to meet your requirements.
   Inter-Process Communication (IPC) mechanisms, enabling the Linux VM to
   seamlessly interact with the system.
   
-  ![Init Setup](./arch/aarch6464/img/triple-guest-shmem.svg)
+  ![Init Setup](./arch/aarch64/img/triple-guest-shmem.svg)
   
   
   ### 5.4.1. Add Shared Memory and IPC to our guest
@@ -1541,7 +1541,7 @@ making the necessary adjustments to meet your requirements.
   
   ```sh
   export LINUX_VM=linux-shmem
-  dtc $ROOT_DIR/arch/aarch6464/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
+  dtc $ROOT_DIR/arch/aarch64/srcs/devicetrees/qemu-aarch64-virt/$LINUX_VM.dts >\
       $LINUX_DIR/linux-build/$LINUX_VM.dtb
   ```
   
@@ -1550,7 +1550,7 @@ making the necessary adjustments to meet your requirements.
   
   Bundle the kernel image and device tree blob into a single binary:
   ```sh
-  make -j $(nproc) -C $ROOT_DIR/arch/aarch6464/srcs/lloader\
+  make -j $(nproc) -C $ROOT_DIR/arch/aarch64/srcs/lloader\
       ARCH=aarch64\
       IMAGE=$BUILDROOT_SRCS/output/images/Image-qemu-aarch64-virt\
       DTB=$LINUX_DIR/linux-build/$LINUX_VM.dtb\
