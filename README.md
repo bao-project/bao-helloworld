@@ -182,7 +182,7 @@ practical aspects, let's first understand the setup we're building. Our goal is
 to deploy a baremetal guest on top of the Bao hypervisor, as shown in the
 figure below:
 
-![Init Setup](./arch/aarch64/img/baremetal-setup.svg)
+![Init Setup](./arch/riscv64/img/baremetal-setup.svg)
 
 :information_source: For the sake of simplicity and accessibility, we'll use
 the QEMU emulator (don't worry, we'll guide you through its installation later
