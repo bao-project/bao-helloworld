@@ -629,7 +629,7 @@ making the necessary adjustments to meet your requirements.
   
   Let's kick things off by incorporating a second VM running FreeRTOS.
   
-  ![Init Setup](/img/baremetal-freertos-setup.svg)
+  ![Init Setup](arch/riscv64/img/baremetal-freertos-setup.svg)
   
   First, we can use the baremetal compiled from the first setup:
   ```sh
