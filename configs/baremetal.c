@@ -1,15 +1,19 @@
 #include <config.h>
 
-VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-setup/baremetal.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-setup/baremetal.bin))
 
-struct config config = {
-
+struct config config  = {
+    
     CONFIG_HEADER
 
     .vmlist_size = 1,
-    .vmlist = {
+    .vmlist = (struct vm_config[]) {
         { 
-            .image = VM_IMAGE_BUILTIN(baremetal_image, 0x80200000),
+            .image = {
+                .base_addr = 0x80200000,
+                .load_addr = VM_IMAGE_OFFSET(baremetal_image),
+                .size = VM_IMAGE_SIZE(baremetal_image)
+            },
 
             .entry = 0x80200000,
 
@@ -20,26 +24,30 @@ struct config config = {
                 .regions =  (struct vm_mem_region[]) {
                     {
                         .base = 0x80200000,
-                        .size = 0x4000000 
+                        .size = 0x4000000
                     }
                 },
 
                 .dev_num = 1,
                 .devs =  (struct vm_dev_region[]) {
-                    {   
-                        /* 8250 */
-                        .pa = 0x10000000,
-                        .va = 0x10000000,
-                        .size = 0x1000,
+                    {
+                        .pa = 0x10000000,   
+                        .va = 0x10000000,  
+                        .size = 0x1000, 
                         .interrupt_num = 1,
                         .interrupts = (irqid_t[]) {10}
                     },
                 },
 
                 .arch = {
-                    .plic_base = 0xc000000,
-                }
+                   .irqc = {
+                        .plic = {
+                            .base = 0xc000000,
+                        },
+                   },
+                },
             },
-        }
-    },
+        },
+     }
+     
 };

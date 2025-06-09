@@ -179,7 +179,7 @@ Then, clone the Bao baremetal guest application we've prepared (you can skip
 this step if you already have your own baremetal source):
 ```sh
 git clone https://github.com/bao-project/bao-baremetal-guest.git\
-    --branch demo $BAREMETAL_SRCS
+    --branch master $BAREMETAL_SRCS
 ```
 
 And now, let's compile it (for simplicity, our example includes a Makefile to
@@ -289,8 +289,9 @@ To get OpenSBI up and running, simply execute the following commands:
 
 ```sh
 export OPENSBI_DIR=$ROOT_DIR/tools/OpenSBI
-git clone https://github.com/bao-project/opensbi.git $OPENSBI_DIR\
-    --depth 1 --branch bao/demo
+git clone https://github.com/bao-project/opensbi.git $OPENSBI_DIR
+cd $OPENSBI_DIR
+git checkout 4489876e933d8ba0d8bc6c64bae71e295d45faac
 ```
 
 ## 4. Let's Try It Out! - Unleash the Power
