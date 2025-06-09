@@ -1,7 +1,7 @@
 #include <config.h>
 
-VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-linux-shmem-setup/baremetal.bin));
-VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/baremetal-linux-shmem-setup/linux-shmem.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/baremetal-linux-shmem-setup/baremetal.bin))
+VM_IMAGE(linux_image, XSTR(BAO_WRKDIR_IMGS/baremetal-linux-shmem-setup/linux-shmem.bin))
 
 struct config config = {
 
@@ -13,7 +13,7 @@ struct config config = {
     },
 
     .vmlist_size = 2,
-    .vmlist = {
+    .vmlist = (struct vm_config[]) {
         { 
             .image = VM_IMAGE_BUILTIN(baremetal_image, 0x80200000),
 
@@ -54,8 +54,12 @@ struct config config = {
                 },
 
                 .arch = {
-                    .plic_base = 0xc000000,
-                }
+                   .irqc = {
+                        .plic = {
+                            .base = 0xc000000,
+                        },
+                   },
+                },
             },
         },
         { 
@@ -100,8 +104,12 @@ struct config config = {
                 },
 
                 .arch = {
-                    .plic_base = 0xc000000,
-                }
+                   .irqc = {
+                        .plic = {
+                            .base = 0xc000000,
+                        },
+                   },
+                },
             },
         }
     },
