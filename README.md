@@ -291,8 +291,7 @@ To get OpenSBI up and running, simply execute the following commands:
 ```sh
 export OPENSBI_DIR=$ROOT_DIR/tools/OpenSBI
 git clone https://github.com/bao-project/opensbi.git $OPENSBI_DIR
-cd $OPENSBI_DIR
-git checkout 4489876e933d8ba0d8bc6c64bae71e295d45faac
+git -C $OPENSBI_DIR checkout 4489876e933d8ba0d8bc6c64bae71e295d45faac
 ```
 
 ## 4. Let's Try It Out! - Unleash the Power
