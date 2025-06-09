@@ -462,6 +462,7 @@ export FREERTOS_PARAMS="STD_ADDR_SPACE=y"
 git clone --recursive --shallow-submodules\
     https://github.com/bao-project/freertos-over-bao.git\
     $FREERTOS_SRCS --branch demo
+git checkout 421dd5600f061ae8c27d026f379da87305488ed3
 git -C $FREERTOS_SRCS apply $PATCHES_DIR/freeRTOS.patch
 make -C $FREERTOS_SRCS PLATFORM=qemu-riscv64-virt $FREERTOS_PARAMS
 ```

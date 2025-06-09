@@ -1,12 +1,12 @@
-diff --git a/src/main.c b/src/main.c
-index c1a2413..1bf7361 100644
---- a/src/main.c
-+++ b/src/main.c
-@@ -52,7 +52,7 @@ void vTask(void *pvParameters)
+diff --git a/src/freertos-app/main.c b/src/freertos-app/main.c
+index f665260..6e30181 100644
+--- a/src/freertos-app/main.c
++++ b/src/freertos-app/main.c
+@@ -51,7 +51,7 @@ void vTask(void *pvParameters)
      unsigned long id = (unsigned long)pvParameters;
      while (1)
      {
--        printf("Task%d: %d\n", id, counter++); 
+-        printf("Task%d: %d\n", id, counter++);
 +        printf("[freeRTOS] Task%d: %d\n", id, counter++);
          vTaskDelay(1000 / portTICK_PERIOD_MS);
      }
