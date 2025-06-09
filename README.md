@@ -229,7 +229,8 @@ crucial step:
 ```sh
 export BAO_SRCS=$ROOT_DIR/bao
 git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
-    --branch demo
+    --branch main
+git -C $BAO_SRCS checkout a1daae75c30c204592bb3d5d9bad1930cf69dcd3
 ```
 
 #### 2.2.2. Compiling Bao Hypervisor
