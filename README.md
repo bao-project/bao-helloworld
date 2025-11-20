@@ -57,7 +57,7 @@ pip3 install pykwalify packaging pyelftools
 [arm-toolchains]:
   https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
 [riscv-toolchains]:
-  https://github.com/sifive/freedom-tools/releases
+  https://github.com/bao-project/bao-riscv-toolchain/releases/tag/gc891d8dc23e
 
 Before we delve deeper, let's ensure you have the right tools at your disposal. We'll guide you
 through obtaining and configuring the appropriate cross-compile toolchain for your target
@@ -131,13 +131,31 @@ cd bao-helloworld
 ```
 
 Next, proceed to configure the development environment and establish a directory tree to organize
-the various components required. Open your terminal and execute the following commands:
+the various components required. First select the target architecture:
+
+<details>
+  <summary><strong>RISC-V (riscv64) instructions</strong></summary>
+
+  ```sh
+  export ARCH=arch/riscv64
+  ```
+</details>
+
+<details>
+  <summary><strong>ARM64 (aarch64) instructions</strong></summary>
+
+  ```sh
+  export ARCH=arch/aarch64
+  ```
+</details>
+
+Open your terminal and execute the following commands:
 
 ```sh
 export ROOT_DIR=$(realpath .)
-export PRE_BUILT_IMGS=$ROOT_DIR/bin
+export PRE_BUILT_IMGS=$ROOT_DIR/ARCH/bin
+export PATCHES_DIR=$ROOT_DIR/ARCH/patches
 export SETUP_BUILD=$ROOT_DIR/build
-export PATCHES_DIR=$ROOT_DIR/patches
 export TOOLS_DIR=$ROOT_DIR/tools
 export BUILD_GUESTS_DIR=$SETUP_BUILD/guests
 export BUILD_BAO_DIR=$SETUP_BUILD/bao
@@ -152,15 +170,18 @@ mkdir -p $TOOLS_DIR/bin
 Upon completing these commands, your directory tree should look like this:
 
 ``` sh
+.
+├── arch
+│   ├── aarch64
+│   └── riscv64
+├── bao-hello-world.pdf
 ├── build
 │   ├── bao
 │   ├── firmware
 │   └── guests
-├── configs
-│   ├──...
-├── img
-│  ├──...
-└──README.md
+├── README.md
+└── tools
+    └── bin
 ```
 
 ### 2.1. Building Your First Bao Guest
