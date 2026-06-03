@@ -155,7 +155,7 @@ Your gateway to seamless virtualization begins with cloning the Bao Hypervisor r
 ```sh
 export BAO_SRCS=$ROOT_DIR/bao
 git clone https://github.com/bao-project/bao-hypervisor $BAO_SRCS\
-    --branch demo
+    --branch main
 ```
 
 #### 2.2.2. Copying Your Configuration
@@ -202,7 +202,7 @@ export TOOLS_DIR=$ROOT_DIR/tools/bin
 mkdir -p $ROOT_DIR/tools/bin
 mkdir -p $TOOLS_DIR
 git clone https://github.com/qemu/qemu.git $QEMU_DIR --depth 1\
-   --branch v7.2.0
+   --branch v11.0.0
 cd $QEMU_DIR
 ./configure --target-list=aarch64-softmmu --enable-slirp
 make -j$(nproc)
@@ -319,11 +319,11 @@ Then, let's compile our new guest:
 
 ```sh
 export FREERTOS_SRCS=$ROOT_DIR/freertos
-export FREERTOS_PARAMS="STD_ADDR_SPACE=y"
+export FREERTOS_PARAMS="STD_ADDR_SPACE=y SHMEM_BASE=0xD0000000 SHMEM_SIZE=0x1000000"
 
 git clone --recursive --shallow-submodules\
     https://github.com/bao-project/freertos-over-bao.git\
-    $FREERTOS_SRCS --branch demo
+    $FREERTOS_SRCS --branch bao-helloworld
 make -C $FREERTOS_SRCS PLATFORM=qemu-aarch64-virt $FREERTOS_PARAMS
 ```
 
@@ -332,6 +332,7 @@ Upon completing these steps, you'll find a binary file in the `FREERTOS_SRCS` di
 ```sh
 mkdir -p $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup
 cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/free-rtos.bin
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-setup/baremetal.bin
 ```
 
 #### 5.1.2. Integrating the new guest
@@ -494,6 +495,8 @@ make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
 Finaly, copy the binary file to the (compiled) guests folder:
 ```sh
 cp $LINUX_DIR/linux-build/$LINUX_VM.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/linux.bin
+cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/free-rtos.bin
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/baremetal.bin
 ```
 
 
@@ -628,7 +631,9 @@ make -j $(nproc) -C $ROOT_DIR/srcs/lloader\
 
 Finally, move the binary file to the (compiled) guests folder:
 ```sh
-cp $LINUX_DIR/linux-build/$LINUX_VM.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-setup/$LINUX_VM.bin
+cp $LINUX_DIR/linux-build/$LINUX_VM.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-shmem-setup/$LINUX_VM.bin
+cp $FREERTOS_SRCS/build/qemu-aarch64-virt/freertos.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-shmem-setup/free-rtos.bin
+cp $BAREMETAL_SRCS/build/qemu-aarch64-virt/baremetal.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-linux-shmem-setup/baremetal.bin
 ```
 
 ### 5.3.2. Rebuild Bao
@@ -636,8 +641,8 @@ cp $LINUX_DIR/linux-build/$LINUX_VM.bin $BUILD_GUESTS_DIR/baremetal-freeRTOS-lin
 Given that you've modified one of the guests, it's now essential to rebuild Bao:
 ```sh
 mkdir -p $mkdir -p $BUILD_BAO_DIR/config
-cp -L $ROOT_DIR/configs/baremetal-freeRTOS-linux.c\
-    $BUILD_BAO_DIR/config/baremetal-freeRTOS-linux.c
+cp -L $ROOT_DIR/configs/baremetal-freeRTOS-linux-shmem.c\
+    $BUILD_BAO_DIR/config/baremetal-freeRTOS-linux-shmem.c
 ```
 
 Subsequently, compile it:
@@ -645,7 +650,7 @@ Subsequently, compile it:
 make -C $BAO_SRCS\
     PLATFORM=qemu-aarch64-virt\
     CONFIG_REPO=$ROOT_DIR/configs\
-    CONFIG=baremetal-freeRTOS-linux\
+    CONFIG=baremetal-freeRTOS-linux-shmem\
     CONFIG_BUILTIN=y\
     CPPFLAGS=-DBAO_WRKDIR_IMGS=$SETUP_BUILD
 ```
@@ -653,7 +658,7 @@ make -C $BAO_SRCS\
 Upon successful completion, you'll locate a binary file named bao.bin in the ``BAO_SRCS`` directory. Move it to your build directory (``BUILD_BAO_DIR``):
 
 ```sh
-cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux/bao.bin $BUILD_BAO_DIR/bao.bin
+cp $BAO_SRCS/bin/qemu-aarch64-virt/baremetal-freeRTOS-linux-shmem/bao.bin $BUILD_BAO_DIR/bao.bin
 ```
 
 

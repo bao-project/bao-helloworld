@@ -1,13 +1,13 @@
 #include <config.h>
 
-VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-setup/baremetal.bin));
+VM_IMAGE(baremetal_image, XSTR(BAO_WRKDIR_IMGS/guests/baremetal-setup/baremetal.bin))
 
 struct config config = {
     
     CONFIG_HEADER
     
     .vmlist_size = 1,
-    .vmlist = {
+    .vmlist = (struct vm_config[]) {
         { 
             .image = {
                 .base_addr = 0x50000000,
